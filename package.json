@@ -1,0 +1,30 @@
+{
+    "name": "mikami-example",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
+    },
+    "devDependencies": {
+        "@sveltejs/vite-plugin-svelte": "^5.0.3",
+        "@tailwindcss/postcss": "^4.1.2",
+        "@tailwindcss/vite": "^4.1.2",
+        "@tsconfig/svelte": "^5.0.4",
+        "autoprefixer": "^10.4.21",
+        "svelte": "^5.20.2",
+        "svelte-check": "^4.1.4",
+        "tailwindcss": "^4.1.2",
+        "typescript": "~5.7.2",
+        "vite": "^6.2.0"
+    },
+    "dependencies": {
+        "@mikami/mikami": "file:../../../mikami/npm-package/mikami-mikami-0.0.1.tgz",
+        "@wailsio/runtime": "^3.0.0-alpha.66",
+        "lucide-svelte": "^0.487.0",
+        "svelte-spa-router": "^4.0.1"
+    }
+}
