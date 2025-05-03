@@ -1,17 +1,16 @@
 <script lang="ts">
-    import { Layer } from "@mikami/mikami";
+    import { Layer, Logger } from "@mikami/mikami";
     import Time from "./Time.svelte";
     import Workspace from "./Workspace.svelte";
     import Tray from "./Tray.svelte";
-    Layer.Init(
-        new Layer.Options({
-            Height: 34,
-            Anchor: Layer.Edge.Top | Layer.Edge.Left | Layer.Edge.Right,
-            Layer: Layer.Layer.Top,
-            Margin: [8, 8, 0, 8],
-            AutoExclusiveZoneEnable: true,
-        })
-    ).then(Layer.Show);
+    const opt = new Layer.Options({
+        Height: 34,
+        Anchor: ["top", "right", "left"],
+        Layer: "top",
+        Margin: [8, 8, 0, 8],
+        AutoExclusiveZoneEnable: true,
+    });
+    Layer.Init(opt).then(Layer.Show);
 </script>
 
 <div class="container">

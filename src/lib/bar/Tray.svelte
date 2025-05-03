@@ -10,7 +10,7 @@
     });
 </script>
 
-<div class="continer flex items-center rounded-full">
+<div class="flex items-center rounded-full gap-1">
     {#each items as item (item.Id)}
         <div
             class="
@@ -25,7 +25,6 @@
                 alt=""
                 src={`data:image/png;base64,${item.Icon.Base64}`}
                 class="
-                    item
                     w-full
                     h-full
                     transition-all duration-300 ease-out

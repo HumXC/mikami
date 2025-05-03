@@ -24,7 +24,7 @@
         workspaces = result;
     };
     onMount(update);
-    Hyprland.Subscribe(Hyprland.EventType.Workspace, update);
+    Hyprland.Subscribe("workspace", update);
 
     function switchWorkspace(id: number) {
         activeWorkspaceId = id;
@@ -35,7 +35,7 @@
 <div class="continer flex items-center rounded-full px-2 w-fit">
     {#each workspaces as w (w.id)}
         <div
-            class="relative flex items-center justify-center mx-1 p-1 h-6"
+            class="relative flex items-center justify-center p-2 h-6"
             on:click={() => switchWorkspace(w.id)}
         >
             <div
