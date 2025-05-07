@@ -1,9 +1,14 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    mikami.url = "github:HumXC/mikami";
   };
 
-  outputs = {nixpkgs, ...}: let
+  outputs = {
+    nixpkgs,
+    mikami,
+    ...
+  }: let
     forAllSystems = nixpkgs.lib.genAttrs [
       "aarch64-linux"
       "x86_64-linux"
@@ -11,8 +16,14 @@
   in {
     packages = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};
+      frontend = pkgs.callPackage ./nix/package-frontend.nix {};
+      mika-shell = pkgs.callPackage ./nix/package.nix {
+        mikami = mikami.packages.${system}.default;
+        mika-shell-frontend = frontend;
+      };
     in {
-      default = pkgs.callPackage ./package.nix {};
+      frontend = frontend;
+      default = mika-shell;
     });
     devShells = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};

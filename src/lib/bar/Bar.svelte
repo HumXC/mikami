@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Layer, Logger } from "@mikami/mikami";
+    import { Layer, Logger } from "@humxc/mikami";
     import Time from "./Time.svelte";
     import Workspace from "./Workspace.svelte";
     import Tray from "./Tray.svelte";

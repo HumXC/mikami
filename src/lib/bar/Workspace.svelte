@@ -1,8 +1,8 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <script lang="ts">
-    import { Hyprland } from "@mikami/mikami";
-    import { Workspace } from "@mikami/mikami/hyprland";
+    import { Hyprland } from "@humxc/mikami";
+    import { Workspace } from "@humxc/mikami/hyprland";
     import { onMount } from "svelte";
 
     let workspaces: Workspace[] = [];

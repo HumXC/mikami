@@ -1,6 +1,40 @@
 {
   "nodes": {
+    "mikami": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1746336670,
+        "narHash": "sha256-mit/QiCuBOBmpA4KX9RokvHcZ41JY/Oxz0rdfbdLaz0=",
+        "owner": "HumXC",
+        "repo": "mikami",
+        "rev": "bb0eff28d3af11bea1e28e6b16ef2c4f29d48d4d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "HumXC",
+        "repo": "mikami",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
+      "locked": {
+        "lastModified": 1741513245,
+        "narHash": "sha256-7rTAMNTY1xoBwz0h7ZMtEcd8LELk9R5TzBPoHuhNSCk=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e3e32b642a31e6714ec1b712de8c91a3352ce7e1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
       "locked": {
         "lastModified": 1741379970,
         "narHash": "sha256-Wh7esNh7G24qYleLvgOSY/7HlDUzWaL/n4qzlBePpiw=",
@@ -18,7 +52,8 @@
     },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "mikami": "mikami",
+        "nixpkgs": "nixpkgs_2"
       }
     }
   },

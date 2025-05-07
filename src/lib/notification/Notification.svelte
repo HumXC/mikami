@@ -1,8 +1,7 @@
 <script lang="ts">
-    import { Layer, Notifd } from "@mikami/mikami";
+    import { Layer, Notifd } from "@humxc/mikami";
     import { flip } from "svelte/animate";
     import { cubicOut } from "svelte/easing";
-    import { Sleep } from "../../utils";
     const width = 340;
     const itemHeight = 80;
     let height = itemHeight;
@@ -44,7 +43,6 @@
     };
     let updateHeightTimer = 0;
     const closeNotification = (id: number) => {
-        return;
         ns = ns.filter((n) => n.Id !== id);
         updateHeightTimer = setTimeout(
             () => {
@@ -67,7 +65,7 @@
     };
     const createNotification = async (n: Notifd.Notification) => {
         setTimer(n.Id);
-        ns = [...ns, n];
+        ns = [n, ...ns];
         if (updateHeightTimer) clearTimeout(updateHeightTimer);
         updateHeight();
     };
