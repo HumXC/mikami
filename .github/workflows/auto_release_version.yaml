@@ -13,18 +13,19 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
-
-            - name: Download mikami
-              run: |
-                  wget https://github.com/HumXC/mikami/releases/download/latest/mikami
-                  chmod +x mikami
-
+            - uses: awalsh128/cache-apt-pkgs-action@latest
+              with:
+                  packages: libwebkit2gtk-4.1-dev libgtk-layer-shell-dev pkg-config
+                  version: 1.0
             - uses: actions/setup-node@v4
             - name: Install dependencies
               run: npm ci
             - name: Build frontend
               run: npm run build
-
+            - name: Download mikami
+              run: |
+                  wget https://github.com/HumXC/mikami/releases/download/latest/mikami
+                  chmod +x mikami
             - name: Bundle frontend
               run: ./mikami bundle ./dist mika-shell HumXC/mika-shell
 
