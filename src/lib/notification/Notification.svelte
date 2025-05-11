@@ -10,17 +10,15 @@
     const timer: Map<number, number> = new Map();
     const animeDuration = 350;
     const timeout = 3000;
-    Layer.Init(
-        new Layer.Options({
-            Title: "Notification",
-            Layer: "top",
-            Anchor: ["right", "top"],
-            Margin: [50],
-            AutoExclusiveZoneEnable: true,
-            Height: height,
-            Width: width,
-        })
-    ).then(Layer.Show);
+    Layer.Init({
+        Title: "Notification",
+        Layer: "top",
+        Anchor: ["right", "top"],
+        Margin: [50],
+        AutoExclusiveZoneEnable: true,
+        Height: height,
+        Width: width,
+    });
     function slideZoom(node: Element, { delay = 0, duration = 250 }) {
         return {
             delay,

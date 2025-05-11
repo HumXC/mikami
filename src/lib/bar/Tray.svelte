@@ -1,16 +1,20 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <script lang="ts">
-    import { Tray } from "@humxc/mikami";
+    import { Logger, Tray } from "@humxc/mikami";
 
     let items: Tray.Item[] = [];
-    Tray.Init().then(async () => {
-        items = await Tray.Items();
-        Tray.Subscribe((it) => () => {
-            items = it;
-            console.log(it);
+    Tray.Init()
+        .then(async () => {
+            items = await Tray.Items();
+            Tray.Subscribe((it) => () => {
+                items = it;
+                console.log(it);
+            });
+        })
+        .catch((e) => {
+            Logger.Error("Cannot create tray", "error", e.message);
         });
-    });
 </script>
 
 {#if items.length !== 0}

@@ -3,14 +3,13 @@
     import Time from "./Time.svelte";
     import Workspace from "./Workspace.svelte";
     import Tray from "./Tray.svelte";
-    const opt = new Layer.Options({
+    Layer.Init({
         Height: 34,
         Anchor: ["top", "right", "left"],
         Layer: "top",
         Margin: [8, 8, 0, 8],
         AutoExclusiveZoneEnable: true,
     });
-    Layer.Init(opt).then(Layer.Show);
 </script>
 
 <div class="container">

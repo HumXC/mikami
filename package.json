@@ -22,7 +22,7 @@
         "vite": "^6.2.0"
     },
     "dependencies": {
-        "@humxc/mikami": "^0.0.1",
+        "@humxc/mikami": "file:../../../mikami/humxc-mikami-0.0.1.tgz",
         "@wailsio/runtime": "^3.0.0-alpha.66",
         "lucide-svelte": "^0.487.0",
         "svelte-spa-router": "^4.0.1"

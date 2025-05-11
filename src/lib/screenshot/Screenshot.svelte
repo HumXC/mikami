@@ -1,9 +1,7 @@
 <script lang="ts">
     import { Layer, OS } from "@humxc/mikami";
-    import { onMount, tick } from "svelte";
+    import { onMount } from "svelte";
     import { CropImage, IsInRect, type Rectangle } from "./utils";
-    import type { EqualSquareIcon } from "lucide-svelte";
-    import { Sleep } from "../../utils";
     let showToolbar = false;
     let imageElement: HTMLImageElement;
     let canvasElement: HTMLCanvasElement;
@@ -38,15 +36,11 @@
     let nearTop = false;
     let nearBottom = false;
     let isInSelection = false;
-    Layer.Init(
-        new Layer.Options({
-            KeyboardMode: "exclusive",
-            Title: "Screenshot",
-            Anchor: ["bottom", "left", "right", "top"],
-            Layer: "top",
-        })
-    ).then(async () => {
-        await Layer.Show();
+    Layer.Init({
+        KeyboardMode: "exclusive",
+        Title: "Screenshot",
+        Anchor: ["bottom", "left", "right", "top"],
+        Layer: "top",
     });
 
     OS.Exec("grim /tmp/screenshot.png").then(async () => {
