@@ -1,4 +1,5 @@
 <script lang="ts">
+    import "@humxc/mikami";
     import Router from "svelte-spa-router";
     import routes from "./routes";
     import { Notifd, Mikami, Logger } from "@humxc/mikami";

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { Layer, OS } from "@humxc/mikami";
+    import { WaitReady } from "@humxc/mikami/common";
     import { onMount } from "svelte";
     import { CropImage, IsInRect, type Rectangle } from "./utils";
     let showToolbar = false;
@@ -290,7 +291,11 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="relative w-full h-full" draggable="false">
+<div
+    class="relative w-full h-full"
+    draggable="false"
+    style:visibility={screenshot ? "visible" : "hidden"}
+>
     {#if screenshot}
         <img
             class="w-full h-full object-contain"
