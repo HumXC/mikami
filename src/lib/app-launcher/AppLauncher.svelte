@@ -3,9 +3,12 @@
     import { Application, ListApps } from "./common";
     import ByCategory from "./ByCategory.svelte";
     import { convertToPinyin } from "tiny-pinyin";
+    import SideControler from "./SideControler.svelte";
+    import { slide } from "svelte/transition";
     let apps: Application[] = [];
     let appsByCategory: Map<string, Application[]> = new Map();
     let appsByName: Map<string, Application[]> = new Map();
+    let browserState: string = "hide";
     ListApps().then(async (result) => {
         apps = result;
         appsByName = apps.reduce((acc, app) => {
@@ -51,10 +54,21 @@
 </script>
 
 <div class="w-full h-full flex">
-    <!-- browser -->
-    <div class="browser w-70 h-full">
-        <ByCategory apps={appsByName} />
+    <div class="h-full">
+        <SideControler bind:state={browserState} />
     </div>
+
+    <!-- browser -->
+    {#if browserState !== "hide"}
+        <div class="browser w-60 h-full" transition:slide={{ duration: 120, axis: "x" }}>
+            {#if browserState === "name"}
+                <ByCategory apps={appsByName} />
+            {:else if browserState === "tags"}
+                <ByCategory apps={appsByCategory} />
+            {/if}
+        </div>
+    {/if}
+
     <!-- cards -->
     <div></div>
 </div>

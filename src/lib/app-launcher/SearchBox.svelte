@@ -13,12 +13,18 @@
         border-gray-600 bg-gray-900/80"
 >
     <input
-        class="flex-1 bg-transparent outline-none text-sm text-gray-200 placeholder-gray-400"
+        class="flex-1 bg-transparent outline-none text-sm text-gray-200"
         type="text"
         bind:value
         {placeholder}
         bind:this={inputRef}
     />
 
-    <Search class="w-5 h-5 text-gray-300 ml-2" />
+    <Search class="w-5 h-5 text-gray-300" />
 </div>
+
+<style>
+    input::placeholder {
+        color: rgb(165, 165, 165);
+    }
+</style>

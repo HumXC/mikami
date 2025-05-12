@@ -76,7 +76,7 @@
     </div>
 
     <!-- 底部搜索框 -->
-    <div class="p-4 border-t border-gray-300">
+    <div class="p-4 border-t border-gray-600">
         <SearchBox onChange={onSearch} bind:this={searchBoxRef} bind:value={searchText} />
     </div>
 </div>
