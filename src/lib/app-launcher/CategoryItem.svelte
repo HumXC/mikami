@@ -26,20 +26,25 @@
     }
 </script>
 
-<!-- FIXME: 鼠标悬浮聚焦的效果有点鬼畜 -->
-<div class="category flex flex-col rounded-sm" class:hover={hasFocus}>
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+    on:mousemove={(e) => {
+        if (MouseHasMoved(e.x, e.y)) hasFocus = true;
+    }}
+    on:mouseleave={() => (hasFocus = false)}
+    class="category flex flex-col rounded-sm"
+    class:hover={hasFocus}
+>
     <button
         class="
         rounded-sm p-1
         flex items-center justify-between
         "
         on:mousemove={(e) => {
-            if (MouseHasMoved(e.x, e.y)) {
+            if (hasFocus) {
                 (e.target as HTMLButtonElement).focus();
-                hasFocus = true;
             }
         }}
-        on:mouseleave={() => (hasFocus = false)}
         on:keypress={handleKeyPressed}
         on:focus={() => (hasFocus = true)}
         on:blur={() => (hasFocus = false)}

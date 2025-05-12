@@ -18,7 +18,6 @@
 
 <!-- svelte-ignore a11y_missing_attribute -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<!-- FIXME: 当按键翻页时，如果鼠标恰好位于按钮上，则会被聚焦到鼠标位置的按钮，而不是按键跳转的按钮 -->
 <div class="app flex flex-col rounded-sm p-1">
     <div
         class="flex items-center justify-between rounded-sm"

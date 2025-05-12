@@ -7,9 +7,7 @@ document.addEventListener("mousemove", (event) => {
     mouseY = event.clientY;
 });
 export function MouseHasMoved(x: number, y: number): boolean {
-    const dx = Math.abs(mouseX - x);
-    const dy = Math.abs(mouseY - y);
-    return dx > 1 || dy > 1;
+    return mouseX !== x || mouseY !== y;
 }
 export class Application extends App.Application {
     IconData: string = "";
