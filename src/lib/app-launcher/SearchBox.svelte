@@ -5,6 +5,7 @@
     export let onChange: (text: string) => void = () => {};
     export const isFocus = () => inputRef && inputRef.matches(":focus");
     let inputRef: HTMLInputElement;
+    $: onChange(value);
 </script>
 
 <div
@@ -16,7 +17,6 @@
         type="text"
         bind:value
         {placeholder}
-        on:input={() => onChange(value)}
         bind:this={inputRef}
     />
 

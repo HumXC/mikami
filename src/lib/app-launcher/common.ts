@@ -1,4 +1,5 @@
 import { App, Theme } from "@humxc/mikami";
+import { convertToPinyin } from "tiny-pinyin";
 let mouseX = 0;
 let mouseY = 0;
 document.addEventListener("mousemove", (event) => {
@@ -37,18 +38,41 @@ export function OnRun(app: App.Application, action?: string) {
     console.log(app);
     // Layer.Close();
 }
+
+function getSearchBody(str: string): { full: string; initials: string } {
+    const flag = "#`";
+    // 首字母的组合
+    let initials = "";
+    let lowerName = convertToPinyin(str, flag, true);
+    if (lowerName.length === str.length + (str.length - 1) * flag.length) {
+        // 不包含拼音
+        lowerName = str.toLowerCase();
+        lowerName.split(" ").forEach((s) => {
+            initials += s.charAt(0);
+        });
+    } else {
+        lowerName.split(flag).forEach((s) => {
+            initials += s.charAt(0);
+        });
+        lowerName = lowerName.replaceAll(flag, "").toLowerCase();
+    }
+    return { full: lowerName, initials };
+}
+// 返回搜索得分，搜索的结果越靠前，得分越高
+// 得分以负数表示，-1 是最高分，0 表示没有搜索到结果
+function searchText(str: string, keyword: string): number {
+    const index = str.indexOf(keyword);
+    if (index === -1) {
+        return 0;
+    }
+    return -index - 1;
+}
 export function Search(
     payload: Map<string, Application[]>,
-    text: string
+    keywords: string[]
 ): { result: Map<string, Application[]>; sorted: string[] } {
     let result = new Map<string, Application[]>();
     let sorted: string[] = [];
-
-    const keywords = text
-        .trim()
-        .toLowerCase()
-        .split(/\s+/)
-        .filter((kw) => kw.length > 0);
 
     if (keywords.length === 0) {
         result = payload;
@@ -57,66 +81,62 @@ export function Search(
     }
 
     const seenAppNames = new Set<string>();
-    const categoryScores: Array<{
+    let categoryScores: Array<{
         category: string;
-        score: number; // 用于排序
-        hasAppMatch: boolean;
+        score: number;
     }> = [];
 
     for (const [category, apps] of payload.entries()) {
         const lowerCategory = category.toLowerCase();
-
-        let categoryMatchScore = Infinity;
+        let categoryMatchScore = 0;
         for (const kw of keywords) {
-            const idx = lowerCategory.indexOf(kw);
-            if (idx !== -1) categoryMatchScore = Math.min(categoryMatchScore, idx);
+            categoryMatchScore += searchText(lowerCategory, kw);
         }
-
-        const matchedApps: { app: Application; matchIndex: number }[] = [];
-
+        const matchedApps: { app: Application; score: number }[] = [];
         for (const app of apps) {
-            const lowerName = app.Name.toLowerCase();
-            if (seenAppNames.has(lowerName)) continue;
+            const { full, initials } = getSearchBody(app.Name);
 
-            let matchIndex = Infinity;
+            if (seenAppNames.has(full)) continue;
+
+            let score = 0;
             for (const kw of keywords) {
-                const index = lowerName.indexOf(kw);
-                if (index >= 0) matchIndex = Math.min(matchIndex, index);
+                let sc = searchText(full, kw);
+                if (sc === 0) {
+                    sc = searchText(initials, kw);
+                }
+                score += sc;
             }
 
-            if (matchIndex !== Infinity) {
-                matchedApps.push({ app, matchIndex });
-                seenAppNames.add(lowerName);
+            if (score !== 0) {
+                matchedApps.push({ app, score });
+                seenAppNames.add(full);
             }
         }
-
         const hasAppMatch = matchedApps.length > 0;
-
-        if (hasAppMatch || categoryMatchScore !== Infinity) {
-            if (hasAppMatch) {
-                matchedApps.sort((a, b) => a.matchIndex - b.matchIndex);
-                result.set(
-                    category,
-                    matchedApps.map(({ app }) => app)
-                );
-            } else {
-                result.set(category, apps); // 仅匹配分类名时保留全部 app
-            }
-
-            const score = hasAppMatch
-                ? matchedApps.reduce((sum, a) => sum + a.matchIndex, 0)
-                : categoryMatchScore + 10000; // 没有 app 匹配的得一个更大的分数排后
-
-            categoryScores.push({ category, score, hasAppMatch });
+        let score = hasAppMatch ? matchedApps.reduce((sum, a) => sum + a.score, 0) : 0;
+        if (hasAppMatch) {
+            matchedApps.sort((a, b) => b.score - a.score);
+            result.set(
+                category,
+                matchedApps.map(({ app }) => app)
+            );
+        } else if (categoryMatchScore != 0) {
+            result.set(category, apps); // 仅匹配分类名时保留全部 app
         }
-    }
 
-    // 排序规则：优先有 app 匹配的，再按 score 升序
-    categoryScores.sort((a, b) => {
-        if (a.hasAppMatch && !b.hasAppMatch) return -1;
-        if (!a.hasAppMatch && b.hasAppMatch) return 1;
-        return a.score - b.score;
-    });
+        if (categoryMatchScore !== 0 && score - categoryMatchScore >= 0) {
+            score = -1;
+        } else {
+            score -= categoryMatchScore;
+        }
+
+        categoryScores.push({ category, score });
+    }
+    categoryScores = categoryScores
+        .filter((item) => item.score !== 0)
+        .sort((a, b) => {
+            return b.score - a.score;
+        });
 
     sorted = categoryScores.map((item) => item.category);
 

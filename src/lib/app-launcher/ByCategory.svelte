@@ -1,47 +1,36 @@
 <script lang="ts">
+    import { convertToPinyin } from "tiny-pinyin";
     import CategoryItem from "./CategoryItem.svelte";
     import SearchBox from "./SearchBox.svelte";
     import { Application, IsPrintableKey, Search } from "./common";
-    export let apps: Application[] = [];
-    let appsByCategory: Map<string, Application[]> = new Map();
+    import { tick } from "svelte";
+
+    export let apps: Map<string, Application[]> = new Map();
     let filteredCategories: Map<string, Application[]> = new Map();
     let filteredCategoriesSorted: string[] = [];
     let categoryRefs: CategoryItem[] = [];
     let searchBoxRef: SearchBox;
     let searchText = "";
     let inited = false;
-    $: if (!inited && apps.length !== 0) {
-        appsByCategory = apps.reduce((acc, app) => {
-            const category = app.Categories || ["Others"];
-            for (const cat of category) {
-                if (!acc.has(cat)) {
-                    acc.set(cat, []);
-                }
-                acc.get(cat)!.push(app);
-            }
-            return acc;
-        }, appsByCategory);
-        filteredCategories = appsByCategory;
-        filteredCategoriesSorted = Array.from(filteredCategories.keys()).sort();
+    $: if (!inited && apps.size !== 0) {
+        filteredCategories = apps;
+        filteredCategoriesSorted = Array.from(filteredCategories.keys()).sort((a, b) => {
+            return a.localeCompare(b);
+        });
+
         inited = true;
     }
     const handleKeyDown = (event: KeyboardEvent) => {
         if (searchBoxRef && searchBoxRef.isFocus()) return;
-        let handled = false;
         if (event.key === "Backspace") {
             searchText = searchText.slice(0, -1);
-            handled = true;
         }
         if (IsPrintableKey(event)) {
             searchText += event.key;
-            handled = true;
-        }
-        if (handled) {
-            onSearch(searchText);
         }
     };
     document.addEventListener("keydown", handleKeyDown);
-    function onSearch(text: string) {
+    async function onSearch(text: string) {
         const keywords = text
             .trim()
             .toLowerCase()
@@ -49,17 +38,18 @@
             .filter((kw) => kw.length > 0);
 
         if (keywords.length === 0) {
-            filteredCategories = appsByCategory;
+            filteredCategories = apps;
             filteredCategoriesSorted = Array.from(filteredCategories.keys()).sort();
             for (const r of categoryRefs) {
                 r?.unexpand();
             }
             return;
         }
-        const { result, sorted } = Search(appsByCategory, text);
+        const { result, sorted } = Search(apps, keywords);
         filteredCategoriesSorted = sorted;
         filteredCategories = result;
         let isFocusFirst = false;
+        await tick();
         for (const r of categoryRefs) {
             if (!r) continue;
             r.expand();
@@ -73,7 +63,7 @@
 
 <div class="sidebar w-full h-full flex flex-col">
     <!-- 可滚动区域 -->
-    <div class="flex-1 flex flex-col pl-4 pt-4 overflow-hidden">
+    <div class="flex-1 flex flex-col pl-4 pt-4 pb-1 overflow-hidden">
         <div class="flex flex-col gap-1 overflow-auto pr-4">
             {#each filteredCategoriesSorted as category, i (i)}
                 <CategoryItem

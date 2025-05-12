@@ -26,6 +26,7 @@
     }
 </script>
 
+<!-- FIXME: 鼠标悬浮聚焦的效果有点鬼畜 -->
 <div class="category flex flex-col rounded-sm" class:hover={hasFocus}>
     <button
         class="
