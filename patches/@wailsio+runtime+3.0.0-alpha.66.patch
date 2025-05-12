@@ -1,0 +1,22 @@
+diff --git a/node_modules/@wailsio/runtime/dist/index.js b/node_modules/@wailsio/runtime/dist/index.js
+index 34f741b..a8811e8 100644
+--- a/node_modules/@wailsio/runtime/dist/index.js
++++ b/node_modules/@wailsio/runtime/dist/index.js
+@@ -10,7 +10,6 @@ The electron alternative for Go
+ // Setup
+ window._wails = window._wails || {};
+ import "./contextmenu.js";
+-import "./drag.js";
+ // Re-export public API
+ import * as Application from "./application.js";
+ import * as Browser from "./browser.js";
+diff --git a/node_modules/@wailsio/runtime/types/index.d.ts b/node_modules/@wailsio/runtime/types/index.d.ts
+index 54dca22..efdd2cb 100644
+--- a/node_modules/@wailsio/runtime/types/index.d.ts
++++ b/node_modules/@wailsio/runtime/types/index.d.ts
+@@ -1,5 +1,4 @@
+ import "./contextmenu.js";
+-import "./drag.js";
+ import * as Application from "./application.js";
+ import * as Browser from "./browser.js";
+ import * as Call from "./calls.js";
