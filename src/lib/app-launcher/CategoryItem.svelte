@@ -9,10 +9,8 @@
     export const getCategory = () => category;
     export let category: string;
     export let apps: Application[];
-    export let onRun: (app: Application, action?: string) => void = () => {};
     let expand_ = false;
     let appsRef: AppItem[] = [];
-    let hasFocus = false;
 
     let focusFirstApp = false;
     function handleKeyPressed(event: KeyboardEvent) {
@@ -54,13 +52,7 @@
             class="flex flex-col gap-1 ml-1 p-1"
         >
             {#each apps as app, i}
-                <AppItem
-                    bind:this={appsRef[i]}
-                    {app}
-                    {onRun}
-                    onFocus={() => (hasFocus = true)}
-                    onBlur={() => (hasFocus = false)}
-                />
+                <AppItem bind:this={appsRef[i]} {app} />
             {/each}
         </div>
     {/if}

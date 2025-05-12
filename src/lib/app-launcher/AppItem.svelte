@@ -1,15 +1,14 @@
 <script lang="ts">
     import { ChevronDown } from "lucide-svelte";
     import { slide } from "svelte/transition";
-    import type { Application } from "./common";
+    import { OnRun, type Application } from "./common";
     export let onFocus: (app: Application) => void = () => {};
     export let onBlur: (app: Application) => void = () => {};
     export const getFocus = () => buttonRef?.focus();
     export let app: Application;
-    export let onRun: (app: Application, action?: string) => void = () => {};
     const RunApp = (app: Application, action?: string) => {
         app.Run(action);
-        onRun(app, action);
+        OnRun(app, action);
     };
     let showActions = false;
     let showPoint = false;

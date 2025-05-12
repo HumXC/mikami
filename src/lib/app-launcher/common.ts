@@ -24,3 +24,8 @@ export function IsPrintableKey(event: KeyboardEvent): boolean {
     // 忽略常见控制键
     return key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
 }
+
+export function OnRun(app: App.Application, action?: string) {
+    console.log(app);
+    // Layer.Close();
+}
