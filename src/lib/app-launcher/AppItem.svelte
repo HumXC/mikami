@@ -1,7 +1,7 @@
 <script lang="ts">
     import { ChevronDown } from "lucide-svelte";
     import { slide } from "svelte/transition";
-    import { OnRun, type Application } from "./common";
+    import { MouseHasMoved, OnRun, type Application } from "./common";
     export let onFocus: (app: Application) => void = () => {};
     export let onBlur: (app: Application) => void = () => {};
     export const getFocus = () => buttonRef?.focus();
@@ -22,7 +22,9 @@
 <div class="app flex flex-col rounded-sm p-1">
     <div
         class="flex items-center justify-between rounded-sm"
-        on:mouseenter={() => buttonRef?.focus()}
+        on:mousemove={(e) => {
+            if (MouseHasMoved(e.x, e.y)) buttonRef?.focus();
+        }}
         on:mouseleave={() => buttonRef?.blur()}
     >
         <button

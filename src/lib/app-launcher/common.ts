@@ -1,9 +1,18 @@
 import { App, Theme } from "@humxc/mikami";
-
+let mouseX = 0;
+let mouseY = 0;
+document.addEventListener("mousemove", (event) => {
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+});
+export function MouseHasMoved(x: number, y: number): boolean {
+    const dx = Math.abs(mouseX - x);
+    const dy = Math.abs(mouseY - y);
+    return dx > 1 || dy > 1;
+}
 export class Application extends App.Application {
     IconData: string = "";
 }
-
 export async function ListApps(): Promise<Application[]> {
     const result: Application[] = [];
     let apps = await App.List();
@@ -24,7 +33,6 @@ export function IsPrintableKey(event: KeyboardEvent): boolean {
     // 忽略常见控制键
     return key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
 }
-
 export function OnRun(app: App.Application, action?: string) {
     console.log(app);
     // Layer.Close();

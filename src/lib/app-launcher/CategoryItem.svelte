@@ -2,23 +2,22 @@
     import { ChevronDown } from "lucide-svelte";
     import AppItem from "./AppItem.svelte";
     import { slide } from "svelte/transition";
-    import type { Application } from "./common";
+    import { MouseHasMoved, type Application } from "./common";
     import { Sleep } from "../../utils";
     export const unexpand = () => (expand_ = false);
     export const expand = () => (expand_ = true);
     export const getCategory = () => category;
-    export const focus = () => {
-        focusFirstApp = true;
-    };
+    export const focus = () => (focusFirstApp = true);
     export let category: string;
     export let apps: Application[];
+    let hasFocus = false;
     let expand_ = false;
     let appsRef: AppItem[] = [];
     let focusFirstApp = false;
     function handleKeyPressed(event: KeyboardEvent) {
         if (event.key === "Enter") {
             expand_ = !expand_;
-            focusFirstApp = true;
+            if (expand_) focusFirstApp = true;
         }
     }
     $: if (focusFirstApp && appsRef[0]) {
@@ -27,14 +26,22 @@
     }
 </script>
 
-<div class="category flex flex-col rounded-sm">
+<div class="category flex flex-col rounded-sm" class:hover={hasFocus}>
     <button
         class="
-        category-{category}
         rounded-sm p-1
         flex items-center justify-between
         "
+        on:mousemove={(e) => {
+            if (MouseHasMoved(e.x, e.y)) {
+                (e.target as HTMLButtonElement).focus();
+                hasFocus = true;
+            }
+        }}
+        on:mouseleave={() => (hasFocus = false)}
         on:keypress={handleKeyPressed}
+        on:focus={() => (hasFocus = true)}
+        on:blur={() => (hasFocus = false)}
         on:mouseup={() => (expand_ = !expand_)}
     >
         <span class="category-name text-left text-nowrap text-ellipsis overflow-hidden"
@@ -58,7 +65,12 @@
             class="flex flex-col gap-1 ml-1 p-1"
         >
             {#each apps as app, i}
-                <AppItem bind:this={appsRef[i]} {app} />
+                <AppItem
+                    bind:this={appsRef[i]}
+                    {app}
+                    onFocus={() => (hasFocus = true)}
+                    onBlur={() => (hasFocus = false)}
+                />
             {/each}
         </div>
     {/if}
@@ -70,7 +82,7 @@
             background-color 0.1s ease-in-out,
             padding-left 0.1s ease-in-out;
     }
-    .category:hover {
+    .hover {
         /* FIXME: 这个配色感觉有点丑 */
         background-color: rgba(93, 227, 113, 0.511);
         padding-left: 6px;

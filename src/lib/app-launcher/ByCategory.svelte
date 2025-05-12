@@ -26,14 +26,19 @@
         inited = true;
     }
     const handleKeyDown = (event: KeyboardEvent) => {
-        if (searchBoxRef.isFocus()) return;
+        if (searchBoxRef && searchBoxRef.isFocus()) return;
+        let handled = false;
         if (event.key === "Backspace") {
             searchText = searchText.slice(0, -1);
+            handled = true;
         }
         if (IsPrintableKey(event)) {
             searchText += event.key;
+            handled = true;
         }
-        onSearch(searchText);
+        if (handled) {
+            onSearch(searchText);
+        }
     };
     document.addEventListener("keydown", handleKeyDown);
     function onSearch(text: string) {
