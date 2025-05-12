@@ -5,6 +5,7 @@
     export let onFocus: (app: Application) => void = () => {};
     export let onBlur: (app: Application) => void = () => {};
     export const getFocus = () => buttonRef?.focus();
+    export const hasFocus = () => buttonRef?.contains(document.activeElement);
     export let app: Application;
     const RunApp = (app: Application, action?: string) => {
         app.Run(action);

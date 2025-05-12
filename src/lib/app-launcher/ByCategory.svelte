@@ -1,15 +1,16 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import CategoryItem from "./CategoryItem.svelte";
     import SearchBox from "./SearchBox.svelte";
-    import { Application, IsPrintableKey } from "./common";
+    import { Application, IsPrintableKey, Search } from "./common";
     export let apps: Application[] = [];
     let appsByCategory: Map<string, Application[]> = new Map();
     let filteredCategories: Map<string, Application[]> = new Map();
     let filteredCategoriesSorted: string[] = [];
     let categoryRefs: CategoryItem[] = [];
     let searchBoxRef: SearchBox;
-    onMount(() => {
+    let searchText = "";
+    let inited = false;
+    $: if (!inited && apps.length !== 0) {
         appsByCategory = apps.reduce((acc, app) => {
             const category = app.Categories || ["Others"];
             for (const cat of category) {
@@ -22,10 +23,17 @@
         }, appsByCategory);
         filteredCategories = appsByCategory;
         filteredCategoriesSorted = Array.from(filteredCategories.keys()).sort();
-    });
-
+        inited = true;
+    }
     const handleKeyDown = (event: KeyboardEvent) => {
-        if (IsPrintableKey(event)) searchBoxRef?.getFocus();
+        if (searchBoxRef.isFocus()) return;
+        if (event.key === "Backspace") {
+            searchText = searchText.slice(0, -1);
+        }
+        if (IsPrintableKey(event)) {
+            searchText += event.key;
+        }
+        onSearch(searchText);
     };
     document.addEventListener("keydown", handleKeyDown);
     function onSearch(text: string) {
@@ -35,7 +43,6 @@
             .split(/\s+/)
             .filter((kw) => kw.length > 0);
 
-        filteredCategoriesSorted = [];
         if (keywords.length === 0) {
             filteredCategories = appsByCategory;
             filteredCategoriesSorted = Array.from(filteredCategories.keys()).sort();
@@ -44,59 +51,17 @@
             }
             return;
         }
-
-        const seenAppNames = new Set<string>();
-        const result = new Map<string, Application[]>();
-        const categoryScores: Array<{ category: string; score: number }> = [];
-
-        for (const [category, apps] of appsByCategory.entries()) {
-            const lowerCategory = category.toLowerCase();
-            const categoryMatch = keywords.some((kw) => lowerCategory.includes(kw));
-            const matchedApps: { app: Application; matchIndex: number }[] = [];
-
-            for (const app of apps) {
-                const lowerName = app.Name.toLowerCase();
-                if (seenAppNames.has(lowerName)) continue;
-
-                let matchIndex = Infinity;
-                for (const kw of keywords) {
-                    const index = lowerName.indexOf(kw);
-                    if (index >= 0) matchIndex = Math.min(matchIndex, index);
-                }
-
-                if (matchIndex !== Infinity) {
-                    matchedApps.push({ app, matchIndex });
-                    seenAppNames.add(lowerName);
-                }
-            }
-
-            if (categoryMatch || matchedApps.length > 0) {
-                // 排序 app，根据匹配的索引排序（匹配越靠前越优先）
-                matchedApps.sort((a, b) => a.matchIndex - b.matchIndex);
-
-                // 仅保留排序后的 app
-                result.set(
-                    category,
-                    matchedApps.map(({ app }) => app)
-                );
-
-                // 类别的匹配得分（越前面匹配的 app 排得越靠前）
-                const topMatchScore = matchedApps.reduce(
-                    (score, { matchIndex }) => score + (matchIndex === 0 ? -1 : 0),
-                    0
-                );
-                categoryScores.push({ category, score: topMatchScore });
-            }
-        }
-
-        // 排序 categories（得分低的排前面）
-        categoryScores.sort((a, b) => a.score - b.score);
-        filteredCategoriesSorted = categoryScores.map((item) => item.category);
-
+        const { result, sorted } = Search(appsByCategory, text);
+        filteredCategoriesSorted = sorted;
         filteredCategories = result;
-
+        let isFocusFirst = false;
         for (const r of categoryRefs) {
-            r?.expand();
+            if (!r) continue;
+            r.expand();
+            if (!isFocusFirst) {
+                r.focus();
+                isFocusFirst = true;
+            }
         }
     }
 </script>
@@ -117,6 +82,6 @@
 
     <!-- 底部搜索框 -->
     <div class="p-4 border-t border-gray-300">
-        <SearchBox onChange={onSearch} bind:this={searchBoxRef} />
+        <SearchBox onChange={onSearch} bind:this={searchBoxRef} bind:value={searchText} />
     </div>
 </div>

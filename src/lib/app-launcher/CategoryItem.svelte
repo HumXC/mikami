@@ -7,17 +7,23 @@
     export const unexpand = () => (expand_ = false);
     export const expand = () => (expand_ = true);
     export const getCategory = () => category;
+    export const focus = () => {
+        focusFirstApp = true;
+    };
     export let category: string;
     export let apps: Application[];
     let expand_ = false;
     let appsRef: AppItem[] = [];
-
     let focusFirstApp = false;
     function handleKeyPressed(event: KeyboardEvent) {
         if (event.key === "Enter") {
             expand_ = !expand_;
             focusFirstApp = true;
         }
+    }
+    $: if (focusFirstApp && appsRef[0]) {
+        appsRef[0].getFocus();
+        focusFirstApp = false;
     }
 </script>
 
