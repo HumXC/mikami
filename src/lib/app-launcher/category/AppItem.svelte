@@ -1,7 +1,7 @@
 <script lang="ts">
     import { ChevronDown } from "lucide-svelte";
     import { slide } from "svelte/transition";
-    import { MouseHasMoved, OnRun, type Application } from "./common";
+    import { MouseHasMoved, OnRun, type Application } from "../common";
     export let onFocus: (app: Application) => void = () => {};
     export let onBlur: (app: Application) => void = () => {};
     export const getFocus = () => buttonRef?.focus();

@@ -2,8 +2,8 @@
     import { ChevronDown } from "lucide-svelte";
     import AppItem from "./AppItem.svelte";
     import { slide } from "svelte/transition";
-    import { MouseHasMoved, type Application } from "./common";
-    import { Sleep } from "../../utils";
+    import { MouseHasMoved, type Application } from "../common";
+    import { Sleep } from "../../../utils";
     export const unexpand = () => (expand_ = false);
     export const expand = () => (expand_ = true);
     export const getCategory = () => category;
