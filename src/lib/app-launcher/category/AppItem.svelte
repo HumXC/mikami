@@ -1,7 +1,10 @@
 <script lang="ts">
     import { ChevronDown } from "lucide-svelte";
-    import { slide } from "svelte/transition";
     import { MouseHasMoved, OnRun, type Application } from "../common";
+    import { GridStack } from "gridstack";
+    import AppTile from "../tiles/AppTile.svelte";
+    import { NewTile } from "../tiles/utils";
+    import { slide } from "svelte/transition";
     export let onFocus: (app: Application) => void = () => {};
     export let onBlur: (app: Application) => void = () => {};
     export const getFocus = () => buttonRef?.focus();
@@ -14,20 +17,29 @@
     let showActions = false;
     let showPoint = false;
     let buttonRef: HTMLButtonElement;
+    function initDrag(element: HTMLElement) {
+        // TODO: Implement Drag
+        GridStack.setupDragIn(".app-item-header", {
+            helper: (e) => {
+                // CreateToGrid(AppTile, { app: app });
+                return NewTile({ x: 1, y: 1, w: 1, h: 1, type: "app", data: app });
+            },
+        });
+    }
 </script>
 
 <!-- svelte-ignore a11y_missing_attribute -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="app flex flex-col rounded-sm p-1">
+<div class="app-item app-item-header flex flex-col rounded-sm p-1" use:initDrag>
     <div
-        class="flex items-center justify-between rounded-sm"
+        class="app-item-header flex items-center justify-between rounded-sm"
         on:mousemove={(e) => {
             if (MouseHasMoved(e.x, e.y)) buttonRef?.focus();
         }}
         on:mouseleave={() => buttonRef?.blur()}
     >
         <button
-            class="flex items-center w-full h-full"
+            class="app-item-header flex items-center w-full h-full"
             on:click={() => RunApp(app)}
             on:focus={() => {
                 onFocus(app);
@@ -40,7 +52,10 @@
             bind:this={buttonRef}
         >
             {#if showPoint}
-                <div class="h-full flex items-center" in:slide={{ duration: 50, axis: "x" }}>
+                <div
+                    class="app-item-header h-full flex items-center"
+                    in:slide={{ duration: 50, axis: "x" }}
+                >
                     <div
                         class="h-full bg-gray-400/80 rounded-full overflow-hidden"
                         in:slide={{ duration: 250 }}
@@ -50,8 +65,8 @@
                     ></div>
                 </div>
             {/if}
-            <img class="w-10 h-10 p-1" src={app.IconData} />
-            <span class="text-sm text-no-overflow">{app.Name}</span>
+            <img class="app-item-header w-10 h-10 p-1" src={app.IconData} />
+            <span class="app-item-header text-sm truncate">{app.Name}</span>
         </button>
         {#if app.Actions.length > 0}
             <button
@@ -78,7 +93,7 @@
                     <div class="action h-10 rounded-sm">
                         <button
                             class="w-full h-full pl-2 flex items-center
-                            text-left text-sm text-no-overflow
+                            text-left text-sm truncate
                             rounded-sm"
                         >
                             {action!.Name}
@@ -91,13 +106,8 @@
 </div>
 
 <style>
-    .app {
+    .app-item {
         background-color: rgba(44, 51, 63, 0.705);
-    }
-    .text-no-overflow {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
     }
     .expend-button {
         background-color: rgba(255, 255, 255, 0.118);

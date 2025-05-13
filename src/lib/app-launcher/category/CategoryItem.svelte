@@ -50,9 +50,7 @@
         on:blur={() => (hasFocus = false)}
         on:mouseup={() => (expand_ = !expand_)}
     >
-        <span class="category-name text-left text-nowrap text-ellipsis overflow-hidden"
-            >{category}</span
-        >
+        <span class="category-name text-left truncate">{category}</span>
         <div
             class="mt-1 transition-transform duration-300 ease-in-out origin-center"
             class:rotate-180={expand_}

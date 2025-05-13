@@ -1,16 +1,18 @@
 <script lang="ts">
     import { Layer, Window } from "@humxc/mikami";
     import { Application, ListApps } from "./common";
-    import ByCategory from "./ByCategory.svelte";
+    import ByCategory from "./category/ByCategory.svelte";
     import { convertToPinyin } from "tiny-pinyin";
-    import SideControler from "./SideControler.svelte";
+    import SideControler from "./sidebar/SideControler.svelte";
     import { slide } from "svelte/transition";
+    import Tiles from "./tiles/Tiles.svelte";
+    import { MountTile } from "./tiles/utils";
     let apps: Application[] = [];
     let appsByCategory: Map<string, Application[]> = new Map();
     let appsByName: Map<string, Application[]> = new Map();
     let browserState: string = "hide";
-    ListApps().then(async (result) => {
-        apps = result;
+    async function loadApps() {
+        apps = await ListApps();
         appsByName = apps.reduce((acc, app) => {
             const name = app.Name || "";
             const firstChar = name[0] || "";
@@ -37,7 +39,7 @@
             return acc;
         }, appsByCategory);
         appsByCategory = appsByCategory;
-    });
+    }
     // Layer.Init({
     //     Height: 100,
     //     Anchor: ["top", "right", "left"],
@@ -51,9 +53,26 @@
     document.addEventListener("keydown", (e) => {
         if (e.code === "Escape") Layer.Close();
     });
+    function createTestTiles() {
+        for (let i = 0; i < 10; i++) {
+            MountTile({
+                x: 0,
+                y: 0,
+                w: 2,
+                h: 2,
+                type: "app",
+                data: apps[i],
+            });
+        }
+    }
+    async function onTilesLoaded() {
+        await loadApps();
+        createTestTiles();
+    }
 </script>
 
 <div class="w-full h-full flex">
+    <!-- side -->
     <div class="h-full">
         <SideControler bind:state={browserState} />
     </div>
@@ -69,13 +88,18 @@
         </div>
     {/if}
 
-    <!-- cards -->
-    <div></div>
+    <!-- tiles -->
+    <div class="tiles flex-1">
+        <Tiles onLoaded={onTilesLoaded} />
+    </div>
 </div>
 
 <style>
     .browser {
         background-color: rgb(8, 14, 24);
         color: rgb(198, 198, 198);
+    }
+    .tiles {
+        background-color: rgb(8, 11, 23);
     }
 </style>
