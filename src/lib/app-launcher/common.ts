@@ -1,5 +1,12 @@
 import { App, Theme } from "@humxc/mikami";
 import { convertToPinyin } from "tiny-pinyin";
+// TODO: 去除 AppLauncher.svelte 中的 apps
+export const apps: Map<string, Application> = new Map();
+ListApps().then((result) => {
+    result.forEach((app) => {
+        apps.set(app.EntryPath, app);
+    });
+});
 let mouseX = 0;
 let mouseY = 0;
 document.addEventListener("mousemove", (event) => {
@@ -32,7 +39,7 @@ export function IsPrintableKey(event: KeyboardEvent): boolean {
     // 忽略常见控制键
     return key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
 }
-export function OnRun(app: App.Application, action?: string) {
+export function OnAppRun(app: App.Application, action?: string) {
     console.log(app);
     // Layer.Close();
 }
@@ -65,6 +72,8 @@ function searchText(str: string, keyword: string): number {
     }
     return -index - 1;
 }
+
+// TODO: 优化搜索算法
 export function Search(
     payload: Map<string, Application[]>,
     keywords: string[]

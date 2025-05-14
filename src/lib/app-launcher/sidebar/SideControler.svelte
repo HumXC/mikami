@@ -31,6 +31,8 @@
         onClick={() => toggleState("tags")}
         bind:isExpanded
     />
+    <!-- Grid 删除控件的区域，如果 Grid 的控件被移动到 div 上方，会删除该控件 -->
+    <div class="tile-trash h-full w-full"></div>
 </div>
 
 <style>

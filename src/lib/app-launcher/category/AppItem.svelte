@@ -1,9 +1,7 @@
 <script lang="ts">
     import { ChevronDown } from "lucide-svelte";
-    import { MouseHasMoved, OnRun, type Application } from "../common";
-    import { GridStack } from "gridstack";
-    import AppTile from "../tiles/AppTile.svelte";
-    import { NewTile } from "../tiles/utils";
+    import { MouseHasMoved, OnAppRun, type Application } from "../common";
+    import { SetupDargAndDrop } from "../tiles/utils";
     import { slide } from "svelte/transition";
     export let onFocus: (app: Application) => void = () => {};
     export let onBlur: (app: Application) => void = () => {};
@@ -12,34 +10,34 @@
     export let app: Application;
     const RunApp = (app: Application, action?: string) => {
         app.Run(action);
-        OnRun(app, action);
+        OnAppRun(app, action);
     };
     let showActions = false;
     let showPoint = false;
     let buttonRef: HTMLButtonElement;
-    function initDrag(element: HTMLElement) {
-        // TODO: Implement Drag
-        GridStack.setupDragIn(".app-item-header", {
-            helper: (e) => {
-                // CreateToGrid(AppTile, { app: app });
-                return NewTile({ x: 1, y: 1, w: 1, h: 1, type: "app", data: app });
-            },
-        });
+    let drags: HTMLElement[] = [];
+    function canDrag(e: HTMLElement) {
+        SetupDargAndDrop(e);
+        drags.push(e);
+        drags = drags;
     }
+    $: drags.forEach((e) => e.setAttribute("data-app-entry-path", app.EntryPath));
 </script>
 
 <!-- svelte-ignore a11y_missing_attribute -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="app-item app-item-header flex flex-col rounded-sm p-1" use:initDrag>
+<div class="app-item flex flex-col rounded-sm p-1">
     <div
-        class="app-item-header flex items-center justify-between rounded-sm"
+        class="flex items-center justify-between rounded-sm"
+        use:canDrag
         on:mousemove={(e) => {
             if (MouseHasMoved(e.x, e.y)) buttonRef?.focus();
         }}
         on:mouseleave={() => buttonRef?.blur()}
     >
         <button
-            class="app-item-header flex items-center w-full h-full"
+            class="flex items-center w-full h-full"
+            use:canDrag
             on:click={() => RunApp(app)}
             on:focus={() => {
                 onFocus(app);
@@ -65,8 +63,8 @@
                     ></div>
                 </div>
             {/if}
-            <img class="app-item-header w-10 h-10 p-1" src={app.IconData} />
-            <span class="app-item-header text-sm truncate">{app.Name}</span>
+            <img use:canDrag class="w-10 h-10 p-1" src={app.IconData} />
+            <span use:canDrag class="text-sm truncate">{app.Name}</span>
         </button>
         {#if app.Actions.length > 0}
             <button

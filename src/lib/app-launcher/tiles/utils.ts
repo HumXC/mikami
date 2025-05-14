@@ -1,12 +1,13 @@
 import { mount } from "svelte";
-import type { Application } from "../common";
-import type { GridStack } from "gridstack";
+import { apps, type Application } from "../common";
+import { GridStack } from "gridstack";
 import Tile from "./Tile.svelte";
 type TileType = "app" | "folder";
 type TileData = {
     app: Application;
     folder: string;
 };
+export const cellSize = 60;
 
 let grid: GridStack | null = null;
 export interface TileOption {
@@ -24,9 +25,8 @@ export function MountTile(tile: TileOption) {
     if (!grid) {
         throw new Error("Grid not initialized");
     }
-    const el = NewTile(tile);
-    grid.makeWidget(el);
-    return el;
+    const item = NewTile(tile);
+    return grid.makeWidget(item);
 }
 function gridContainer(
     x: number,
@@ -34,6 +34,12 @@ function gridContainer(
     w: number,
     h: number
 ): [item: HTMLElement, content: HTMLElement] {
+    if (!grid) {
+        throw new Error("Grid not initialized");
+    }
+    if (!grid.willItFit({ x, y, w, h })) {
+        throw new Error("Not enough free space to place the widget on the grid");
+    }
     const item = document.createElement("div");
     item.classList.add("grid-stack-item");
     item.setAttribute("gs-w", `${w}`);
@@ -50,6 +56,7 @@ export function NewTile(tile: TileOption) {
         throw new Error("Grid not initialized");
     }
     const [item, content] = gridContainer(tile.x, tile.y, tile.w, tile.h);
+
     mount(Tile, {
         target: content,
         props: {
@@ -57,4 +64,24 @@ export function NewTile(tile: TileOption) {
         },
     });
     return item;
+}
+export function SetupDargAndDrop(e: HTMLElement) {
+    const helper = (ee: HTMLElement) => {
+        // FIXME: 拖放的元素和放置的元素具有不同的尺寸，这不对
+        const id = ee.getAttribute("data-app-entry-path");
+        if (!id) {
+            throw new Error("Invalid data-app-entry-path");
+        }
+
+        const newEl = NewTile({
+            x: 1,
+            y: 1,
+            w: 1,
+            h: 1,
+            type: "app",
+            data: apps.get(id)!,
+        });
+        return newEl;
+    };
+    GridStack.setupDragIn([e], { helper });
 }

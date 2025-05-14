@@ -1,20 +1,21 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import type { Application } from "../common";
+    import { OnAppRun, type Application } from "../common";
+    import { cellSize } from "./utils";
     const iconSizes = new Map<number, number>([
-        [100, 45],
-        [200, 80],
-        [300, 120],
+        [cellSize, cellSize * 0.65],
+        [cellSize * 2, cellSize * 0.9],
+        [cellSize * 3, cellSize * 1.5],
     ]);
 
-    let iconSize = iconSizes.get(100)!;
+    let iconSize = iconSizes.get(cellSize)!;
 
     export let app: Application;
     let showText = true;
-    let tileEl: HTMLDivElement;
+    let tileEl: HTMLButtonElement;
     function updateSize() {
         const rect = tileEl.getBoundingClientRect();
-        showText = rect.width >= 100 && rect.height >= 100;
+        showText = Math.min(rect.width, rect.height) >= cellSize;
         for (const [size, sizePx] of iconSizes.entries()) {
             if (Math.min(rect.width, rect.height) <= size) {
                 iconSize = sizePx;
@@ -23,7 +24,10 @@
             iconSize = sizePx;
         }
     }
-
+    function RunApp() {
+        app.Run();
+        OnAppRun(app);
+    }
     onMount(() => {
         updateSize();
 
@@ -38,7 +42,8 @@
 </script>
 
 <!-- svelte-ignore a11y_missing_attribute -->
-<div
+<button
+    on:click={RunApp}
     bind:this={tileEl}
     class="tile bg-blur w-full h-full flex flex-col justify-center items-center rounded-lg"
 >
@@ -51,7 +56,7 @@
     {#if showText}
         <span class="truncate w-full p-2 text-center">{app.Name}</span>
     {/if}
-</div>
+</button>
 
 <style>
     * {

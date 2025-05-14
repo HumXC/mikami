@@ -52,6 +52,11 @@
 
     document.addEventListener("keydown", (e) => {
         if (e.code === "Escape") Layer.Close();
+        if (e.code == "Tab") {
+            if (browserState === "hide") {
+                browserState = "name";
+            }
+        }
     });
     function createTestTiles() {
         for (let i = 0; i < 10; i++) {
@@ -67,7 +72,7 @@
     }
     async function onTilesLoaded() {
         await loadApps();
-        createTestTiles();
+        // createTestTiles();
     }
 </script>
 
