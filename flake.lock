@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1746336670,
-        "narHash": "sha256-mit/QiCuBOBmpA4KX9RokvHcZ41JY/Oxz0rdfbdLaz0=",
+        "lastModified": 1747234116,
+        "narHash": "sha256-wqNmOLzsSbEni18ROQtaZNwvp3PQXon+N73dBCs/3hE=",
         "owner": "HumXC",
         "repo": "mikami",
-        "rev": "bb0eff28d3af11bea1e28e6b16ef2c4f29d48d4d",
+        "rev": "f6ea1ae842b47953685bd8b7cb52b600982dc227",
         "type": "github"
       },
       "original": {

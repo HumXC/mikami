@@ -25,7 +25,7 @@
         "vite": "^6.2.0"
     },
     "dependencies": {
-        "@humxc/mikami": "file:../../../mikami/humxc-mikami-0.0.1.tgz",
+        "@humxc/mikami": "^0.0.2",
         "@wailsio/runtime": "^3.0.0-alpha.66",
         "gridstack": "^12.1.2",
         "lucide-svelte": "^0.487.0",

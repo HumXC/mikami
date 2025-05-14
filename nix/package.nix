@@ -6,6 +6,7 @@
   gsettings-desktop-schemas,
   glib-networking,
   gtk3,
+  gnat,
   makeWrapper,
   webkitgtk_4_1,
   gtk-layer-shell,
@@ -15,7 +16,7 @@ stdenvNoCC.mkDerivation {
   pname = "mika-shall";
   version = "0.0.1";
   src = mika-shell-frontend.out;
-  nativeBuildInputs = [mikami makeWrapper];
+  nativeBuildInputs = [mikami makeWrapper gnat];
   buildInputs = [webkitgtk_4_1 gtk-layer-shell];
   buildPhase = ''
     mikami bundle $src/share/mika-shell-frontend mika-shell "HumXC/mika-shell"
