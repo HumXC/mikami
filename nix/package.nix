@@ -13,7 +13,7 @@
   ...
 }:
 stdenvNoCC.mkDerivation {
-  pname = "mika-shall";
+  pname = "mika-shell";
   version = "0.0.1";
   src = mika-shell-frontend.out;
   nativeBuildInputs = [mikami makeWrapper gnat];
