@@ -12,7 +12,7 @@
 
     export let app: Application;
     let showText = true;
-    let tileEl: HTMLButtonElement;
+    let tileEl: HTMLElement;
     function updateSize() {
         const rect = tileEl.getBoundingClientRect();
         showText = Math.min(rect.width, rect.height) >= cellSize;
@@ -42,7 +42,9 @@
 </script>
 
 <!-- svelte-ignore a11y_missing_attribute -->
-<button
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
     on:click={RunApp}
     bind:this={tileEl}
     class="tile bg-blur w-full h-full flex flex-col justify-center items-center rounded-lg"
@@ -56,7 +58,7 @@
     {#if showText}
         <span class="truncate w-full p-2 text-center">{app.Name}</span>
     {/if}
-</button>
+</div>
 
 <style>
     * {
