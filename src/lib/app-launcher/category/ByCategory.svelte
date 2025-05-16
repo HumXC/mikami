@@ -28,6 +28,10 @@
         if (IsPrintableKey(event)) {
             searchText += event.key;
         }
+
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "a") {
+            searchBoxRef.focus();
+        }
     };
     document.addEventListener("keydown", handleKeyDown);
     async function onSearch(text: string) {

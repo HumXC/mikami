@@ -4,6 +4,7 @@
     export let placeholder: string = "你想要什么...";
     export let onChange: (text: string) => void = () => {};
     export const isFocus = () => inputRef && inputRef.matches(":focus");
+    export const focus = () => inputRef && inputRef.focus();
     let inputRef: HTMLInputElement;
     $: onChange(value);
 </script>

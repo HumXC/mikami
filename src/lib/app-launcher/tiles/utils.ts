@@ -1,11 +1,9 @@
 import { mount } from "svelte";
-import { apps, type Application } from "../common";
 import { GridStack } from "gridstack";
 import Tile from "./Tile.svelte";
-type TileType = "app" | "folder";
+type TileType = "app";
 type TileData = {
-    app: Application;
-    folder: string;
+    app: string;
 };
 export const cellSize = 60;
 
@@ -21,14 +19,18 @@ export interface TileOption {
 export function __initGrid(gridStack: GridStack) {
     grid = gridStack;
 }
-export function MountTile(tile: TileOption) {
+export function MountTile(tile: TileOption, id?: number) {
     if (!grid) {
         throw new Error("Grid not initialized");
     }
     const item = NewTile(tile);
+
+    if (id !== undefined) {
+        item.setAttribute("data-tile-id", id.toString());
+    }
     return grid.makeWidget(item);
 }
-function gridContainer(
+function createGridItem(
     x: number,
     y: number,
     w: number,
@@ -55,7 +57,7 @@ export function NewTile(tile: TileOption) {
     if (!grid) {
         throw new Error("Grid not initialized");
     }
-    const [item, content] = gridContainer(tile.x, tile.y, tile.w, tile.h);
+    const [item, content] = createGridItem(tile.x, tile.y, tile.w, tile.h);
 
     mount(Tile, {
         target: content,
@@ -68,19 +70,19 @@ export function NewTile(tile: TileOption) {
 export function SetupDargAndDrop(e: HTMLElement) {
     const helper = (ee: HTMLElement) => {
         // FIXME: 拖放的元素和放置的元素具有不同的尺寸，这不对
-        const id = ee.getAttribute("data-app-entry-path");
-        if (!id) {
+        const entryPath = ee.getAttribute("data-app-entry-path");
+        if (!entryPath) {
             throw new Error("Invalid data-app-entry-path");
         }
-
-        const newEl = NewTile({
+        const tile: TileOption = {
             x: 0,
             y: 0,
             w: 2,
             h: 2,
             type: "app",
-            data: apps.get(id)!,
-        });
+            data: entryPath,
+        };
+        const newEl = NewTile(tile);
         return newEl;
     };
     GridStack.setupDragIn([e], { helper });

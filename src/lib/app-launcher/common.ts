@@ -1,12 +1,13 @@
-import { App, Theme } from "@humxc/mikami";
+import { App, Layer, Theme } from "@humxc/mikami";
 import { convertToPinyin } from "tiny-pinyin";
 // TODO: 去除 AppLauncher.svelte 中的 apps
-export const apps: Map<string, Application> = new Map();
-ListApps().then((result) => {
+export const Apps: Map<string, Application> = new Map();
+export async function InitApps() {
+    const result = await ListApps();
     result.forEach((app) => {
-        apps.set(app.EntryPath, app);
+        Apps.set(app.EntryPath, app);
     });
-});
+}
 let mouseX = 0;
 let mouseY = 0;
 document.addEventListener("mousemove", (event) => {
@@ -19,7 +20,7 @@ export function MouseHasMoved(x: number, y: number): boolean {
 export class Application extends App.Application {
     IconData: string = "";
 }
-export async function ListApps(): Promise<Application[]> {
+async function ListApps(): Promise<Application[]> {
     const result: Application[] = [];
     let apps = await App.List();
     apps = apps.filter((app) => !(app.NoDisplay || app.Hidden));
@@ -40,8 +41,7 @@ export function IsPrintableKey(event: KeyboardEvent): boolean {
     return key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
 }
 export function OnAppRun(app: App.Application, action?: string) {
-    console.log(app);
-    // Layer.Close();
+    Layer.Close();
 }
 
 function getSearchBody(str: string): { full: string; initials: string } {

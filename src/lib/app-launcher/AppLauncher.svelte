@@ -1,18 +1,19 @@
 <script lang="ts">
-    import { Layer, Window } from "@humxc/mikami";
-    import { Application, ListApps } from "./common";
+    import { Layer } from "@humxc/mikami";
+    import { Application, Apps, InitApps } from "./common";
     import ByCategory from "./category/ByCategory.svelte";
     import { convertToPinyin } from "tiny-pinyin";
     import SideControler from "./sidebar/SideControler.svelte";
     import { slide } from "svelte/transition";
     import Tiles from "./tiles/Tiles.svelte";
     import { MountTile } from "./tiles/utils";
+    import { Config, InitConfig, Sleep } from "../../utils";
     let apps: Application[] = [];
     let appsByCategory: Map<string, Application[]> = new Map();
     let appsByName: Map<string, Application[]> = new Map();
-    let browserState: string = "hide";
+    let browserState: string = "name";
     async function loadApps() {
-        apps = await ListApps();
+        apps = Array.from(Apps.values());
         appsByName = apps.reduce((acc, app) => {
             const name = app.Name || "";
             const firstChar = name[0] || "";
@@ -40,15 +41,13 @@
         }, appsByCategory);
         appsByCategory = appsByCategory;
     }
-    // Layer.Init({
-    //     Height: 100,
-    //     Anchor: ["top", "right", "left"],
-    //     Layer: "top",
-    //     Margin: [8, 8, 0, 8],
-    //     AutoExclusiveZoneEnable: true,
-    //     KeyboardMode: "on-demand",
-    // });
-    Window.Init();
+    Layer.Init({
+        Height: 100,
+        Anchor: ["top", "right", "left", "bottom"],
+        Layer: "top",
+        AutoExclusiveZoneEnable: true,
+        KeyboardMode: "exclusive",
+    });
 
     document.addEventListener("keydown", (e) => {
         if (e.code === "Escape") Layer.Close();
@@ -58,21 +57,13 @@
             }
         }
     });
-    function createTestTiles() {
-        for (let i = 0; i < 10; i++) {
-            MountTile({
-                x: 0,
-                y: 0,
-                w: 2,
-                h: 2,
-                type: "app",
-                data: apps[i],
-            });
-        }
-    }
     async function onTilesLoaded() {
+        await InitApps();
         await loadApps();
-        // createTestTiles();
+        await InitConfig();
+        Config["app-launcher"].tiles.forEach((tile, i) => {
+            MountTile(tile, i);
+        });
     }
 </script>
 

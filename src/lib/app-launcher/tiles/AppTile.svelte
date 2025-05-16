@@ -25,6 +25,7 @@
         }
     }
     function RunApp() {
+        if (!app) return;
         app.Run();
         OnAppRun(app);
     }
@@ -47,6 +48,7 @@
 <div
     on:click={RunApp}
     bind:this={tileEl}
+    data-app-entry-path={app.EntryPath}
     class="tile bg-blur w-full h-full flex flex-col justify-center items-center rounded-lg"
 >
     <img
