@@ -1,6 +1,8 @@
 <script lang="ts">
-    import { layer, monitor } from "@mika-shell/core";
+    import { icon, layer, monitor } from "@mika-shell/core";
     import { hyprland } from "@mika-shell/extra";
+    import { AppWindow } from "lucide-svelte";
+
     import { workspace } from "@mika-shell/extra/hyprland";
     import { clients } from "@mika-shell/extra/hyprland/command";
     import { onMount } from "svelte";
@@ -27,7 +29,14 @@
         });
     type Workspace = {
         id: number;
-        clients: { x: number; y: number; w: number; h: number; floating: boolean }[];
+        clients: {
+            x: number;
+            y: number;
+            w: number;
+            h: number;
+            floating: boolean;
+            className: string;
+        }[];
     };
     let ws: Workspace[] = [];
     const update = async () => {
@@ -76,16 +85,19 @@
                 w,
                 h,
                 floating: client.floating,
+                className: client.class,
             });
         });
         ws = Array.from(map.values()).sort((a, b) => a.id - b.id);
     };
     onMount(async () => {
         window.addEventListener("mousemove", async () => {
+            if (!isShow) {
+                isShow = true;
+                layer.setSize(LAYER_WIDTH, 0);
+                update();
+            }
             clearTimeout(timer);
-            layer.setSize(LAYER_WIDTH, 0);
-            isShow = true;
-            update();
         });
         box.addEventListener("mouseleave", () => {
             clearTimeout(timer);
@@ -99,6 +111,9 @@
         return () => {
             hyprland.command.dispatch("workspace", id.toString());
         };
+    };
+    const getIcon = async (className: string) => {
+        return await icon.lookup(className.toLowerCase(), 256);
     };
 </script>
 
@@ -129,7 +144,33 @@
                         style:top="{client.y}px"
                         style:width="{client.w}px"
                         style:height="{client.h}px"
-                    ></div>
+                    >
+                        <div
+                            class="w-full h-full flex flex-col justify-center items-center"
+                            style:visibility={Math.min(client.w, client.h) > 30
+                                ? "visible"
+                                : "hidden"}
+                        >
+                            {#await getIcon(client.className)}
+                                <AppWindow size={32} />
+                            {:then icon}
+                                <img
+                                    src={icon}
+                                    alt={client.className}
+                                    class="w-[32px] h=[32px] object-contain"
+                                />
+                            {:catch e}
+                                <AppWindow size={32} />
+                            {/await}
+                            <span
+                                style:visibility={Math.min(client.w, client.h) > 30
+                                    ? "visible"
+                                    : "hidden"}
+                                class="w-full text-center pl-2 pr-2 text-white text-2xs whitespace-nowrap overflow-hidden text-ellipsis"
+                                >{client.className}</span
+                            >
+                        </div>
+                    </div>
                 {/each}
             </div>
         {/each}
@@ -138,22 +179,25 @@
 
 <style>
     .contianer {
-        background-color: #4b4b4b84;
+        background-color: #3b3b3bb0;
         border: 2px solid #aeaeae88;
         box-sizing: border-box;
     }
     .workspace {
         background-color: rgba(63, 106, 215, 0.623);
+        transition: background-color 0.2s ease-in-out;
     }
     .workspace:hover {
         background-color: rgba(30, 145, 26, 0.728);
+        box-shadow: 0px 0px 3px rgba(172, 255, 147, 0.81);
     }
     .client {
-        background-color: rgb(191, 191, 191);
-        opacity: 0.8;
+        background-color: rgba(191, 191, 191, 0.651);
     }
     .floating {
-        background-color: rgba(193, 193, 193, 0.809);
-        opacity: 0.7;
+        background-color: rgba(193, 193, 193, 0.267);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.25);
     }
 </style>

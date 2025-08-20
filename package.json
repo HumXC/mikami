@@ -11,7 +11,6 @@
     },
     "devDependencies": {
         "@mika-shell/core": "file:../mika-shell/mika-shell-core-0.0.4.tgz",
-        "@mika-shell/extra": "file:../mika-shell/mika-shell-extra-0.0.4.tgz",
         "@sveltejs/vite-plugin-svelte": "^5.0.3",
         "@tailwindcss/postcss": "^4.1.2",
         "@tailwindcss/vite": "^4.1.2",
@@ -24,8 +23,12 @@
         "vite": "^6.2.0"
     },
     "dependencies": {
+        "@mika-shell/extra": "file:../mika-shell/mika-shell-extra-0.0.4.tgz",
+        "fuse.js": "^7.1.0",
         "gridstack": "^12.1.2",
+        "hotkeys-js": "^3.13.15",
         "lucide-svelte": "^0.487.0",
+        "pinyin": "^4.0.0",
         "svelte-spa-router": "^4.0.1",
         "tiny-pinyin": "^1.3.2"
     }

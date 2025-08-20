@@ -21,6 +21,10 @@
         {
             "name": "workspace",
             "path": "/#/workspace"
+        },
+        {
+            "name": "clipboard",
+            "path": "/#/clipboard"
         }
     ],
     "startup": ["bar", "notification", "workspace"]

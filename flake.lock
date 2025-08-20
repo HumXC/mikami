@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1755668731,
-        "narHash": "sha256-Ou2gUUNujtET1px+pUwYy3gKBHLkZy9njdI9syjvkwk=",
+        "lastModified": 1755677603,
+        "narHash": "sha256-lQd9Qu+ZyfoKrIIntZwyEWkkt09xcGXrXNvgaKo3YfA=",
         "owner": "HumXC",
         "repo": "mika-shell",
-        "rev": "c35a41274d197947798ba19fe3772da5e61ded48",
+        "rev": "f492c3916b5c9f52b1a02357eedd88dcfc237d82",
         "type": "github"
       },
       "original": {
