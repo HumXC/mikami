@@ -1,23 +1,25 @@
 <script lang="ts">
-    import { Layer, Notifd } from "@humxc/mikami";
+    import { layer, notifd, icon } from "@mika-shell/core";
+    import { tick } from "svelte";
     import { flip } from "svelte/animate";
     import { cubicOut } from "svelte/easing";
     const width = 340;
     const itemHeight = 80;
     let height = itemHeight;
     const itemGap = 8;
-    let ns: Notifd.Notification[] = [];
+    let ns: notifd.Notification[] = $state([]);
     const timer: Map<number, number> = new Map();
     const animeDuration = 350;
     const timeout = 3000;
-    Layer.Init({
-        Title: "Notification",
-        Layer: "top",
-        Anchor: ["right", "top"],
-        Margin: [50],
-        AutoExclusiveZoneEnable: true,
-        Height: height,
-        Width: width,
+    layer.init({
+        namespace: "notification",
+        layer: "top",
+        anchor: ["right", "top"],
+        margin: [8, 8, 0, 0],
+        autoExclusiveZone: true,
+        backgroundTransparent: true,
+        height: height,
+        width: width,
     });
     function slideZoom(node: Element, { delay = 0, duration = 250 }) {
         return {
@@ -35,19 +37,14 @@
         };
     }
 
-    const updateHeight = (delay = 0) => {
+    const updateHeight = () => {
         height = itemHeight * ns.length + itemGap * (ns.length <= 0 ? 0 : ns.length - 1);
-        Layer.SetSize(width, height);
+        layer.setSize(width, height === 0 ? 1 : height);
     };
     let updateHeightTimer = 0;
     const closeNotification = (id: number) => {
-        ns = ns.filter((n) => n.Id !== id);
-        updateHeightTimer = setTimeout(
-            () => {
-                updateHeight();
-            },
-            animeDuration * 2 + 10
-        );
+        ns = ns.filter((n) => n.id !== id);
+        updateHeightTimer = setTimeout(updateHeight, animeDuration * 2 + 10);
     };
     const setTimer = (id: number) => {
         clearTimer(id);
@@ -61,23 +58,32 @@
     const clearTimer = (id: number) => {
         if (timer.has(id)) clearTimeout(timer.get(id));
     };
-    const createNotification = async (n: Notifd.Notification) => {
-        setTimer(n.Id);
+    const createNotification = async (n: notifd.Notification) => {
+        setTimer(n.id);
         ns = [n, ...ns];
         if (updateHeightTimer) clearTimeout(updateHeightTimer);
+        await tick();
         updateHeight();
     };
-    Notifd.GetNotifications().then((ns_) => createNotification(ns_.pop()!));
-    Notifd.Subscribe("notification", (n) => createNotification(n));
-    Notifd.Subscribe("close-notification", (id) => closeNotification(id));
+
+    notifd.on("added", async (id) => createNotification(await notifd.get(id)));
+    notifd.on("removed", (id) => closeNotification(id));
+
     const onClick = (id: number) => {
-        Notifd.InvokeAction(id, "default");
+        notifd.activate(id);
         closeNotification(id);
+    };
+    const getImage = async (n: notifd.Notification): Promise<string | undefined> => {
+        if (n.hints.imageData) return n.hints.imageData.base64;
+        if (n.hints.imagePath) return await icon.lookup(n.hints.imagePath, 256);
+        if (n.appIcon) return await icon.lookup(n.appIcon, 256);
+        if (n.appName) return await icon.lookup(n.appName, 256);
+        return undefined;
     };
 </script>
 
-<div class="w-full h-full flex flex-col justify-start items-right px-2">
-    {#each ns as n (n.Id)}
+<div class="w-full h-full flex flex-col justify-start items-right">
+    {#each ns as n (n.id)}
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
@@ -88,21 +94,28 @@
                 duration: animeDuration,
                 easing: cubicOut,
             }}
-            onclick={() => onClick(n.Id)}
-            onmouseenter={() => clearTimer(n.Id)}
-            onmouseleave={() => setTimer(n.Id)}
+            onclick={() => onClick(n.id)}
+            onmouseenter={() => clearTimer(n.id)}
+            onmouseleave={() => setTimer(n.id)}
         >
-            <img
-                class="rounded-xl h-full aspect-square object-cover"
-                src={"data:image/png;base64," + n.Image}
-                alt="image_"
-            />
+            {#await getImage(n)}
+                <img
+                    class="rounded-xl h-full aspect-square object-cover"
+                    alt="notification_image"
+                />
+            {:then image}
+                <img
+                    class="rounded-xl h-full aspect-square object-cover"
+                    src={image}
+                    alt="notification_image"
+                />
+            {/await}
             <div class="flex flex-col justify-start items-start w-full">
                 <div class="w-full flex justify-between items-center">
-                    <span class="font-bold text-sm truncate">{n.Summary}</span>
-                    <span class="text-xs text-gray-500">{n.AppName}</span>
+                    <span class="font-bold text-sm truncate">{n.summary}</span>
+                    <span class="text-xs text-gray-500">{n.appName}</span>
                 </div>
-                <span class="text-gray-300 text-xs text-ellipsis line-clamp-2">{n.Body}</span>
+                <span class="text-gray-300 text-xs text-ellipsis line-clamp-2">{n.body}</span>
             </div>
         </div>
     {/each}

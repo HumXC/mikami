@@ -1,25 +1,34 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <script lang="ts">
-    import { Logger, Tray } from "@humxc/mikami";
+    import { tray } from "@mika-shell/core";
+    import { onMount } from "svelte";
+    let items: tray.Item[] = [];
+    onMount(async () => {
+        items = await tray.getItems();
+    });
+    tray.on("added", async (service: string) => {
+        items = [...items, await tray.getItem(service)];
+    });
+    tray.on("removed", (service: string) => {
+        console.log("removed", service);
 
-    let items: Tray.Item[] = [];
-    Tray.Init()
-        .then(async () => {
-            items = await Tray.Items();
-            Tray.Subscribe((it) => () => {
-                items = it;
-                console.log(it);
-            });
-        })
-        .catch((e) => {
-            Logger.Error("Cannot create tray", "error", e.message);
-        });
+        items = items.filter((item) => item.service !== service);
+    });
+    tray.on("changed", async (service: string) => {
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].service === service) {
+                items[i] = await tray.getItem(service);
+                break;
+            }
+        }
+        items = [...items];
+    });
 </script>
 
 {#if items.length !== 0}
     <div class="flex items-center rounded-full gap-1">
-        {#each items as item (item.Id)}
+        {#each items as item}
             <div
                 class="
                 flex items-center justify-center
@@ -27,11 +36,11 @@
                 transition-all duration-300 ease-out
                 overflow-hidden
             "
-                on:click={() => item.Activate()}
+                on:click={() => tray.activate(item.service, 0, 0)}
             >
                 <img
                     alt=""
-                    src={`data:image/png;base64,${item.Icon.Base64}`}
+                    src={tray.pickIcon(item, 256)}
                     class="
                     w-full
                     h-full

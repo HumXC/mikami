@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { OnAppRun, type Application } from "../common";
     import { cellSize } from "./utils";
+    import { apps as App } from "@mika-shell/core";
     const iconSizes = new Map<number, number>([
         [cellSize, cellSize * 0.65],
         [cellSize * 2, cellSize * 0.9],
@@ -26,7 +27,7 @@
     }
     function RunApp() {
         if (!app) return;
-        app.Run();
+        App.activate(app.id);
         OnAppRun(app);
     }
     onMount(() => {
@@ -48,17 +49,17 @@
 <div
     on:click={RunApp}
     bind:this={tileEl}
-    data-app-entry-path={app.EntryPath}
+    data-app-entry-path={app.id}
     class="tile bg-blur w-full h-full flex flex-col justify-center items-center rounded-lg"
 >
     <img
         class="p-0.5"
-        src={app.IconData}
+        src={app.iconData}
         style:width={iconSize + "px"}
         style:height={iconSize + "px"}
     />
     {#if showText}
-        <span class="truncate w-full p-2 text-center">{app.Name}</span>
+        <span class="truncate w-full p-2 text-center">{app.name}</span>
     {/if}
 </div>
 

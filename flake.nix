@@ -1,12 +1,12 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    mikami.url = "github:HumXC/mikami";
+    mika-shell.url = "github:HumXC/mika-shell";
   };
 
   outputs = {
     nixpkgs,
-    mikami,
+    mika-shell,
     ...
   }: let
     forAllSystems = nixpkgs.lib.genAttrs [
@@ -17,24 +17,27 @@
     packages = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};
       frontend = pkgs.callPackage ./nix/package-frontend.nix {};
-      mika-shell = pkgs.callPackage ./nix/package.nix {
-        mikami = mikami.packages.${system}.default;
+      mika-shell-frontend = pkgs.callPackage ./nix/package.nix {
         mika-shell-frontend = frontend;
       };
     in {
-      frontend = frontend;
-      default = mika-shell;
+      default = mika-shell-frontend;
     });
     devShells = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};
     in {
       default = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          nodejs
-          tailwindcss
-          tailwindcss-language-server
-          vue-language-server
-        ];
+        buildInputs = with pkgs;
+          [
+            nodejs
+            tailwindcss
+            tailwindcss-language-server
+            vue-language-server
+          ]
+          ++ [
+            mika-shell.packages.${system}.debug
+          ];
+        MIKASHELL_DEV_SERVER = "http://localhost:5173";
       };
     });
   };

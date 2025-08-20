@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { Layer, OS } from "@humxc/mikami";
-    import { WaitReady } from "@humxc/mikami/common";
+    import { layer, os } from "@mika-shell/core";
+    // TODO: 尝试使用 div 代替 canvas 绘制选框
     import { onMount } from "svelte";
     import { CropImage, IsInRect, type Rectangle } from "./utils";
+    import { Sleep } from "../../utils";
     let showToolbar = false;
     let imageElement: HTMLImageElement;
     let canvasElement: HTMLCanvasElement;
@@ -37,39 +38,52 @@
     let nearTop = false;
     let nearBottom = false;
     let isInSelection = false;
-    Layer.Init({
-        KeyboardMode: "exclusive",
-        Title: "Screenshot",
-        Anchor: ["bottom", "left", "right", "top"],
-        Layer: "top",
+    layer.init({
+        keyboardMode: "exclusive",
+        namespace: "screenshot",
+        anchor: ["bottom", "left", "right", "top"],
+        layer: "top",
+        autoExclusiveZone: false,
+        backgroundTransparent: true,
+        exclusiveZone: -1,
     });
-
-    OS.Exec("grim /tmp/screenshot.png").then(async () => {
-        screenshot = await OS.Read("/tmp/screenshot.png");
-    });
-    const Quit = async () => {
-        await OS.Exec("rm /tmp/screenshot.png");
-        Layer.Close();
+    const main = async () => {
+        await os.exec(["rm", "/tmp/screenshot.png"]);
+        await os.exec([
+            "sh",
+            "-c",
+            "grim /tmp/screenshot_tmp.png && mv /tmp/screenshot_tmp.png /tmp/screenshot.png",
+        ]);
+        for (let i = 0; i < 500; i++) {
+            try {
+                const data = await os.read("/tmp/screenshot.png");
+                screenshot = `data:image/png;base64,${data}`;
+                break;
+            } catch {}
+            await Sleep(20);
+        }
     };
+    main();
     const handleKeyDown = async (event: KeyboardEvent) => {
         if (event.code === "Escape") {
             event.stopPropagation();
-            Quit();
+            layer.close();
         }
 
         if (event.code === "Enter" || event.code === "Space") {
+            console.log("Key pressed:", imageElement, selection);
             event.stopPropagation();
             if (!imageElement || !selection.width || !selection.height) return;
             const cropped = CropImage(imageElement, selection);
             if (cropped) {
-                await OS.Write("/tmp/screenshot.png", cropped);
-                await OS.Exec('sh -c "cat /tmp/screenshot.png | wl-copy -t image/png"');
+                await os.write("/tmp/screenshot.png", cropped);
+                await os.exec(["sh", "-c", "cat /tmp/screenshot.png | wl-copy -t image/png"]);
             }
-            Quit();
+            layer.close();
         }
         if (event.code === "F12") {
             event.stopPropagation();
-            Layer.OpenDevTools();
+            layer.openDevTools();
         }
     };
     const hasSelection = () => {
@@ -123,6 +137,11 @@
         document.addEventListener("mousemove", handleMouseMove);
         document.addEventListener("mouseup", handleMouseUp);
         document.addEventListener("mousedown", handleMouseDown);
+        const ro = new ResizeObserver((entries) => {
+            canvasElement.width = entries[0].contentRect.width;
+            canvasElement.height = entries[0].contentRect.height;
+        });
+        ro.observe(canvasElement);
     });
 
     function calculateToolbarPosition(
@@ -291,38 +310,31 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-    class="relative w-full h-full"
-    draggable="false"
-    style:visibility={screenshot ? "visible" : "hidden"}
->
-    {#if screenshot}
-        <img
-            class="w-full h-full object-contain"
-            style="image-rendering: pixelated;"
-            src={"data:image/png;base64," + screenshot}
-            alt="Screenshot"
-            bind:this={imageElement}
+<div class="relative w-full h-full" draggable="false">
+    <img
+        class="w-full h-full object-contain"
+        style="image-rendering: pixelated;"
+        src={screenshot}
+        style:opacity={screenshot ? 1 : 0}
+        alt="Screenshot"
+        bind:this={imageElement}
+        draggable="false"
+    />
+    <canvas
+        draggable="false"
+        bind:this={canvasElement}
+        class="absolute top-0 left-0 w-full h-full"
+        style="cursor: {cursor};"
+    ></canvas>
+    {#if showToolbar}
+        <div
             draggable="false"
-        />
-        <canvas
-            draggable="false"
-            bind:this={canvasElement}
-            class="absolute top-0 left-0 w-full h-full"
-            style="cursor: {cursor};"
-            height={imageElement ? imageElement.height : 0}
-            width={imageElement ? imageElement.width : 0}
-        ></canvas>
-        {#if showToolbar}
-            <div
-                draggable="false"
-                class="toolbar overflow-hidden"
-                style="width: {toolbarRect.width}px; height: {toolbarRect.height}px; left:{toolbarRect.x}px; top:{toolbarRect.y}px;"
-            >
-                <button draggable="false">保存</button>
-                <button draggable="false">取消</button>
-            </div>
-        {/if}
+            class="toolbar overflow-hidden"
+            style="width: {toolbarRect.width}px; height: {toolbarRect.height}px; left:{toolbarRect.x}px; top:{toolbarRect.y}px;"
+        >
+            <button draggable="false">保存</button>
+            <button draggable="false">取消</button>
+        </div>
     {/if}
 </div>
 

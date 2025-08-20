@@ -7,17 +7,16 @@
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
-        "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
-        "predev": "patch-package",
-        "prebuild": "patch-package"
+        "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
     },
     "devDependencies": {
+        "@mika-shell/core": "file:../mika-shell/mika-shell-core-0.0.4.tgz",
+        "@mika-shell/extra": "file:../mika-shell/mika-shell-extra-0.0.4.tgz",
         "@sveltejs/vite-plugin-svelte": "^5.0.3",
         "@tailwindcss/postcss": "^4.1.2",
         "@tailwindcss/vite": "^4.1.2",
         "@tsconfig/svelte": "^5.0.4",
         "autoprefixer": "^10.4.21",
-        "patch-package": "^8.0.0",
         "svelte": "^5.20.2",
         "svelte-check": "^4.1.4",
         "tailwindcss": "^4.1.2",
@@ -25,8 +24,6 @@
         "vite": "^6.2.0"
     },
     "dependencies": {
-        "@humxc/mikami": "^0.0.2",
-        "@wailsio/runtime": "^3.0.0-alpha.66",
         "gridstack": "^12.1.2",
         "lucide-svelte": "^0.487.0",
         "svelte-spa-router": "^4.0.1",

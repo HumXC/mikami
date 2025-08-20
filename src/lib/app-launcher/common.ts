@@ -1,11 +1,15 @@
-import { App, Layer, Theme } from "@humxc/mikami";
+import { apps as App, icon as Icon, layer } from "@mika-shell/core";
 import { convertToPinyin } from "tiny-pinyin";
+import { Sleep } from "../../utils";
 // TODO: 去除 AppLauncher.svelte 中的 apps
 export const Apps: Map<string, Application> = new Map();
 export async function InitApps() {
-    const result = await ListApps();
+    const result = JSON.parse(localStorage.getItem("app-launcher-apps") || "[]") as Application[];
     result.forEach((app) => {
-        Apps.set(app.EntryPath, app);
+        Apps.set(app.id, app);
+    });
+    ListApps().then((apps) => {
+        localStorage.setItem("app-launcher-apps", JSON.stringify(apps));
     });
 }
 let mouseX = 0;
@@ -17,20 +21,30 @@ document.addEventListener("mousemove", (event) => {
 export function MouseHasMoved(x: number, y: number): boolean {
     return mouseX !== x || mouseY !== y;
 }
-export class Application extends App.Application {
-    IconData: string = "";
-}
+
+export type Application = App.Entry & {
+    iconData: string;
+};
 async function ListApps(): Promise<Application[]> {
     const result: Application[] = [];
-    let apps = await App.List();
-    apps = apps.filter((app) => !(app.NoDisplay || app.Hidden));
+    let apps = await App.list();
+    apps = apps.filter((app) => !(app.noDisplay || app.hidden));
     for (const app of apps) {
-        let icon = await Theme.LookupIcon(app.Icon, 64);
-        if (icon === "") {
-            icon = await Theme.LookupIcon("application-x-executable", 64);
-        }
-        const a = new Application(app);
-        a.IconData = icon;
+        let icon: string | null = null;
+
+        try {
+            icon = await Icon.lookup(app.icon || "", 256);
+        } catch {}
+        try {
+            if (icon === null) {
+                icon = await Icon.lookup("application-x-executable-symbolic", 64);
+            }
+        } catch {}
+
+        let a: Application = {
+            ...app,
+            iconData: icon || "",
+        };
         result.push(a);
     }
     return result;
@@ -40,8 +54,8 @@ export function IsPrintableKey(event: KeyboardEvent): boolean {
     // 忽略常见控制键
     return key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
 }
-export function OnAppRun(app: App.Application, action?: string) {
-    Layer.Close();
+export function OnAppRun(app: Application, action?: string) {
+    layer.close();
 }
 
 function getSearchBody(str: string): { full: string; initials: string } {
@@ -101,7 +115,7 @@ export function Search(
         }
         const matchedApps: { app: Application; score: number }[] = [];
         for (const app of apps) {
-            const { full, initials } = getSearchBody(app.Name);
+            const { full, initials } = getSearchBody(app.name);
 
             if (seenAppNames.has(full)) continue;
 

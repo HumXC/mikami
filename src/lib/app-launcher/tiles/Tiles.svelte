@@ -1,9 +1,9 @@
 <script lang="ts">
     import "gridstack/dist/gridstack.min.css";
     import { GridStack } from "gridstack";
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
     import { __initGrid, cellSize, type TileOption } from "./utils";
-    import { Config, SaveConfig } from "../../../utils";
+    import { Sleep } from "../../../utils";
     let containerRef: HTMLDivElement;
     let grid: GridStack;
     let width: number = 0;
@@ -13,6 +13,7 @@
         // @ts-ignore
         grid.el.style["min-height"] = `${height}px`;
     }
+    const tiles = JSON.parse(localStorage.getItem("app-launcher-tiles") || "[]");
     function updateTile(el: HTMLElement) {
         const w = el.getAttribute("gs-w");
         const h = el.getAttribute("gs-h");
@@ -23,7 +24,7 @@
             console.error("data-tile-id not found", el);
             return;
         }
-        const tile = Config["app-launcher"].tiles[parseInt(id)];
+        const tile = tiles[parseInt(id)];
         if (!tile) {
             console.error("tile not found", id);
             return;
@@ -50,7 +51,7 @@
                 updateTile(node.el!);
             });
             keepGridHeight();
-            SaveConfig();
+            localStorage.setItem("app-launcher-tiles", JSON.stringify(tiles));
         });
         grid.on("drag", () => keepGridHeight());
         grid.on("dragstart", () => keepGridHeight());
@@ -63,9 +64,9 @@
             const node = nodes[0];
             const id = node.el!.getAttribute("data-tile-id")!;
             const index = parseInt(id);
-            Config["app-launcher"].tiles.splice(index, 1);
+            tiles.splice(index, 1);
             keepGridHeight();
-            SaveConfig();
+            localStorage.setItem("app-launcher-tiles", JSON.stringify(tiles));
         });
         grid.on("added", (e, nodes) => {
             if (nodes.length > 1) {
@@ -87,14 +88,13 @@
                 type: "app",
                 data: appEntryPath,
             };
-            const id = `${Config["app-launcher"].tiles.length}`;
-            node.el!.setAttribute("data-tile-id", id);
-            Config["app-launcher"].tiles.push(tile);
+            node.el!.setAttribute("data-tile-id", tiles.length);
+            tiles.push(tile);
             keepGridHeight();
-            SaveConfig();
+            localStorage.setItem("app-launcher-tiles", JSON.stringify(tiles));
         });
         __initGrid(grid);
-        onLoaded();
+        Sleep(100).then(onLoaded);
     }
 
     onMount(() => {
@@ -109,7 +109,6 @@
             }
         });
         observer.observe(containerRef);
-
         return () => observer.disconnect();
     });
 </script>

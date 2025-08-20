@@ -2,7 +2,7 @@
     import { convertToPinyin } from "tiny-pinyin";
     import CategoryItem from "./CategoryItem.svelte";
     import SearchBox from "./SearchBox.svelte";
-    import { Application, IsPrintableKey, Search } from "../common";
+    import { type Application, IsPrintableKey, Search } from "../common";
     import { tick } from "svelte";
 
     export let apps: Map<string, Application[]> = new Map();

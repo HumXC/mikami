@@ -1,13 +1,14 @@
 <script lang="ts">
-    import { Layer } from "@humxc/mikami";
-    import { Application, Apps, InitApps } from "./common";
+    import { layer, window } from "@mika-shell/core";
+    import { Apps, InitApps } from "./common";
+    import { type Application } from "./common";
     import ByCategory from "./category/ByCategory.svelte";
     import { convertToPinyin } from "tiny-pinyin";
     import SideControler from "./sidebar/SideControler.svelte";
     import { slide } from "svelte/transition";
     import Tiles from "./tiles/Tiles.svelte";
-    import { MountTile } from "./tiles/utils";
-    import { Config, InitConfig, Sleep } from "../../utils";
+    import { MountTile, type TileOption } from "./tiles/utils";
+    import { Sleep } from "../../utils";
     let apps: Application[] = [];
     let appsByCategory: Map<string, Application[]> = new Map();
     let appsByName: Map<string, Application[]> = new Map();
@@ -15,7 +16,7 @@
     async function loadApps() {
         apps = Array.from(Apps.values());
         appsByName = apps.reduce((acc, app) => {
-            const name = app.Name || "";
+            const name = app.name || "";
             const firstChar = name[0] || "";
             const py = convertToPinyin(firstChar);
             let letter = py?.[0]?.[0]?.toUpperCase?.() || "#";
@@ -30,7 +31,7 @@
         }, appsByName);
         appsByName = appsByName;
         appsByCategory = apps.reduce((acc, app) => {
-            const category = app.Categories || ["Others"];
+            const category = app.categories || ["Others"];
             for (const cat of category) {
                 if (!acc.has(cat)) {
                     acc.set(cat, []);
@@ -41,16 +42,14 @@
         }, appsByCategory);
         appsByCategory = appsByCategory;
     }
-    Layer.Init({
-        Height: 100,
-        Anchor: ["top", "right", "left", "bottom"],
-        Layer: "top",
-        AutoExclusiveZoneEnable: true,
-        KeyboardMode: "exclusive",
+    layer.init({
+        anchor: ["top", "right", "left", "bottom"],
+        layer: "top",
+        exclusiveZone: -1,
+        keyboardMode: "exclusive",
     });
-
     document.addEventListener("keydown", (e) => {
-        if (e.code === "Escape") Layer.Close();
+        if (e.code === "Escape") layer.close();
         if (e.code == "Tab") {
             if (browserState === "hide") {
                 browserState = "name";
@@ -60,8 +59,8 @@
     async function onTilesLoaded() {
         await InitApps();
         await loadApps();
-        await InitConfig();
-        Config["app-launcher"].tiles.forEach((tile, i) => {
+        const tiles: TileOption[] = JSON.parse(localStorage.getItem("app-launcher-tiles") ?? "[]");
+        tiles.forEach((tile, i) => {
             MountTile(tile, i);
         });
     }

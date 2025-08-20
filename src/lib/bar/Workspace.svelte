@@ -1,42 +1,54 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <script lang="ts">
-    import { Hyprland } from "@humxc/mikami";
-    import { Workspace } from "@humxc/mikami/hyprland";
+    import * as ws from "@mika-shell/extra/hyprland/workspace";
     import { onMount } from "svelte";
-
-    let workspaces: Workspace[] = [];
+    let workspaces: ws.Workspace[] = [];
+    const emptyWorkspace = (id: number) => {
+        return {
+            id,
+            windows: 0,
+            name: "empty",
+            monitor: "NaN",
+            monitorID: 0,
+            hasfullscreen: false,
+            lastwindow: "",
+            lastwindowtitle: "",
+            ispersistent: false,
+        };
+    };
 
     let activeWorkspaceId = 0;
     const update = async () => {
-        const ws = await Hyprland.GetWorkspace();
-        const result: Workspace[] = [];
-        for (let i = 1; i <= ws[ws.length - 1].id; i++) {
-            const w = ws.find((w) => w.id === i);
-
-            if (w) {
-                result.push(w);
-            } else {
-                result.push(new Workspace({ id: i, windows: 0 }));
+        const workspaces_ = await ws.list();
+        workspaces_.sort((a, b) => a.id - b.id);
+        const max = workspaces_[workspaces_.length - 1].id - 1;
+        for (let i = 0; i < max; i++) {
+            if (workspaces_[i].id !== i + 1) {
+                workspaces_.splice(i, 0, emptyWorkspace(i + 1));
             }
         }
-        activeWorkspaceId = (await Hyprland.GetActiveWorkspace()).id;
-        workspaces = result;
+        workspaces = workspaces_;
+        activeWorkspaceId = (await ws.active()).id;
     };
-    onMount(update);
-    Hyprland.Subscribe("workspace", update);
-
-    function switchWorkspace(id: number) {
-        activeWorkspaceId = id;
-        Hyprland.Dispatch(`workspace ${id}`);
-    }
+    onMount(async () => {
+        update();
+        ws.on("create", update);
+        ws.on("destroy", update);
+        ws.on("active", (data) => {
+            activeWorkspaceId = data.workspaceId;
+        });
+    });
+    const onWheel = (e: WheelEvent) => {
+        ws.activate(e.deltaY > 0 ? "next" : "prev");
+    };
 </script>
 
-<div class="continer flex items-center rounded-full px-2 w-fit">
+<div class="continer flex items-center rounded-full px-2 w-fit" onwheel={onWheel}>
     {#each workspaces as w (w.id)}
         <div
             class="relative flex items-center justify-center p-2 h-6"
-            on:click={() => switchWorkspace(w.id)}
+            onclick={() => ws.activate(w.id)}
         >
             <div
                 class=" 
@@ -57,16 +69,17 @@
 
 <style>
     .continer {
-        background-color: rgba(182, 182, 182, 0.274);
+        background-color: rgba(133, 133, 133, 0.274);
     }
     .item {
-        background-color: rgba(184, 182, 182, 0.622);
+        background-color: rgba(186, 186, 186, 0.663);
     }
     .empty {
-        background-color: transparentd;
+        background-color: rgba(61, 61, 61, 0.725);
         border: 1px solid rgba(255, 255, 255, 0.441);
     }
     .active {
-        background-color: rgb(241, 241, 241);
+        background-color: rgb(222, 222, 222);
+        border: none;
     }
 </style>

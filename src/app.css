@@ -24,3 +24,9 @@ body {
     outline: none;
     user-select: none;
 }
+html,
+body,
+main,
+#app {
+    height: 100%;
+}

@@ -1,0 +1,27 @@
+{
+    "name": "Example",
+    "description": "This is an example mika-shell configuration file",
+    "pages": [
+        {
+            "name": "bar",
+            "path": "/#/bar"
+        },
+        {
+            "name": "notification",
+            "path": "/#/notification"
+        },
+        {
+            "name": "screenshot",
+            "path": "/#/screenshot"
+        },
+        {
+            "name": "app-launcher",
+            "path": "/#/app-launcher"
+        },
+        {
+            "name": "workspace",
+            "path": "/#/workspace"
+        }
+    ],
+    "startup": ["bar", "notification", "workspace"]
+}

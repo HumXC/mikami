@@ -1,22 +1,20 @@
 <script lang="ts">
-    import { Layer, Logger } from "@humxc/mikami";
     import Time from "./Time.svelte";
-    import Workspace from "./Workspace.svelte";
     import Tray from "./Tray.svelte";
-    Layer.Init({
-        Height: 34,
-        Anchor: ["top", "right", "left"],
-        Layer: "top",
-        Margin: [8, 8, 0, 8],
-        AutoExclusiveZoneEnable: true,
+    import { layer, notifd, mika } from "@mika-shell/core";
+    import Workspace from "./Workspace.svelte";
+    layer.init({
+        height: 34,
+        anchor: ["top", "right", "left"],
+        layer: "top",
+        margin: [8, 8, 0, 8],
+        autoExclusiveZone: true,
+        backgroundTransparent: true,
     });
 </script>
 
 <div class="container">
-    <div class="left">
-        <Tray />
-        <Workspace />
-    </div>
+    <div class="left"><Tray /><Workspace /></div>
 
     <div class="center">
         <div class="center-left">L</div>
@@ -32,7 +30,7 @@
         @apply flex flex-row justify-between items-center min-w-full min-h-full;
         padding: 0 6px;
         border-radius: 50px;
-        background: #000308b1;
+        background: #000308a8;
     }
 
     .left,

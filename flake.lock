@@ -1,30 +1,30 @@
 {
   "nodes": {
-    "mikami": {
+    "mika-shell": {
       "inputs": {
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1747289018,
-        "narHash": "sha256-lS9FUOLe45ndrZ7pRQl5ZRiH4pa4ezrHYul3zOu2OqI=",
+        "lastModified": 1755668731,
+        "narHash": "sha256-Ou2gUUNujtET1px+pUwYy3gKBHLkZy9njdI9syjvkwk=",
         "owner": "HumXC",
-        "repo": "mikami",
-        "rev": "d28b3c7ab13f8b333da7954103c439ca776e78c5",
+        "repo": "mika-shell",
+        "rev": "c35a41274d197947798ba19fe3772da5e61ded48",
         "type": "github"
       },
       "original": {
         "owner": "HumXC",
-        "repo": "mikami",
+        "repo": "mika-shell",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1741513245,
-        "narHash": "sha256-7rTAMNTY1xoBwz0h7ZMtEcd8LELk9R5TzBPoHuhNSCk=",
+        "lastModified": 1748460289,
+        "narHash": "sha256-7doLyJBzCllvqX4gszYtmZUToxKvMUrg45EUWaUYmBg=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e3e32b642a31e6714ec1b712de8c91a3352ce7e1",
+        "rev": "96ec055edbe5ee227f28cdbc3f1ddf1df5965102",
         "type": "github"
       },
       "original": {
@@ -36,11 +36,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1741379970,
-        "narHash": "sha256-Wh7esNh7G24qYleLvgOSY/7HlDUzWaL/n4qzlBePpiw=",
+        "lastModified": 1754498491,
+        "narHash": "sha256-erbiH2agUTD0Z30xcVSFcDHzkRvkRXOQ3lb887bcVrs=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "36fd87baa9083f34f7f5027900b62ee6d09b1f2f",
+        "rev": "c2ae88e026f9525daf89587f3cbee584b92b6134",
         "type": "github"
       },
       "original": {
@@ -52,7 +52,7 @@
     },
     "root": {
       "inputs": {
-        "mikami": "mikami",
+        "mika-shell": "mika-shell",
         "nixpkgs": "nixpkgs_2"
       }
     }

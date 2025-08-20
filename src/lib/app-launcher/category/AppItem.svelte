@@ -2,6 +2,7 @@
     import { ChevronDown } from "lucide-svelte";
     import { MouseHasMoved, OnAppRun, type Application } from "../common";
     import { SetupDargAndDrop } from "../tiles/utils";
+    import { apps as App } from "@mika-shell/core";
     import { slide } from "svelte/transition";
     export let onFocus: (app: Application) => void = () => {};
     export let onBlur: (app: Application) => void = () => {};
@@ -9,7 +10,7 @@
     export const hasFocus = () => buttonRef?.contains(document.activeElement);
     export let app: Application;
     const RunApp = (app: Application, action?: string) => {
-        app.Run(action);
+        App.activate(app.id, action);
         OnAppRun(app, action);
     };
     let showActions = false;
@@ -21,7 +22,7 @@
         drags.push(e);
         drags = drags;
     }
-    $: drags.forEach((e) => e.setAttribute("data-app-entry-path", app.EntryPath));
+    $: drags.forEach((e) => e.setAttribute("data-app-entry-path", app.id));
 </script>
 
 <!-- svelte-ignore a11y_missing_attribute -->
@@ -63,10 +64,10 @@
                     ></div>
                 </div>
             {/if}
-            <img use:canDrag class="w-10 h-10 p-1" src={app.IconData} />
-            <span use:canDrag class="text-sm truncate">{app.Name}</span>
+            <img use:canDrag class="w-10 h-10 p-1" src={app.iconData} />
+            <span use:canDrag class="text-sm truncate">{app.name}</span>
         </button>
-        {#if app.Actions.length > 0}
+        {#if app.actions.length > 0}
             <button
                 tabindex="-1"
                 class="expend-button p-1 mr-1 rounded-sm"
@@ -83,18 +84,18 @@
     </div>
 
     <!-- Actions -->
-    {#if app.Actions.length > 0 && showActions}
+    {#if app.actions.length > 0 && showActions}
         <div transition:slide={{ duration: 250 }} class="overflow-hidden text-center">
             <hr class="w-[90%] mx-auto m-1" />
             <div class="flex flex-col gap-1">
-                {#each app.Actions as action}
+                {#each app.actions as action}
                     <div class="action h-10 rounded-sm">
                         <button
                             class="w-full h-full pl-2 flex items-center
                             text-left text-sm truncate
                             rounded-sm"
                         >
-                            {action!.Name}
+                            {action!.name}
                         </button>
                     </div>
                 {/each}
