@@ -1,10 +1,7 @@
 <script lang="ts">
-    import { icon, layer, monitor } from "@mika-shell/core";
+    import { apps, icon, layer, monitor } from "@mika-shell/core";
     import { hyprland } from "@mika-shell/extra";
     import { AppWindow } from "lucide-svelte";
-
-    import { workspace } from "@mika-shell/extra/hyprland";
-    import { clients } from "@mika-shell/extra/hyprland/command";
     import { onMount } from "svelte";
     const padding = 8;
     const HIDDEN_WIDTH = 6;
@@ -15,6 +12,8 @@
     let timer: number = 0;
     let box: HTMLDivElement;
     let isShow = false;
+    let activeWorkspace: number;
+
     layer
         .init({
             anchor: ["bottom", "top", "right"],
@@ -40,6 +39,9 @@
     };
     let ws: Workspace[] = [];
     const update = async () => {
+        hyprland.command.activeworkspace().then((w) => {
+            activeWorkspace = w.id;
+        });
         const map: Map<number, Workspace> = new Map();
         let clients = await hyprland.command.clients();
         clients.sort((a, b) => {
@@ -104,16 +106,28 @@
             timer = setTimeout(() => {
                 layer.setSize(HIDDEN_WIDTH, 0);
                 isShow = false;
-            }, 600);
+            }, 100);
         });
     });
     const activate = (id: number) => {
         return () => {
             hyprland.command.dispatch("workspace", id.toString());
+            activeWorkspace = id;
         };
     };
+    const desktopEntrys = JSON.parse(localStorage.getItem("app-launcher-apps") || "[]");
+
     const getIcon = async (className: string) => {
-        return await icon.lookup(className.toLowerCase(), 256);
+        try {
+            return await icon.lookup(className.toLowerCase(), 256);
+        } catch {
+            for (const app of desktopEntrys) {
+                if (app.id === className) {
+                    return app.iconData;
+                }
+            }
+        }
+        throw new Error("icon not found");
     };
 </script>
 
@@ -134,6 +148,7 @@
                 class="workspace relative w-full flex-shrink-0 border-0 rounded-sm"
                 style:height="{HEIGHT}px"
                 style:width="{WIDTH}px"
+                class:active={workspace.id === activeWorkspace}
                 onclick={activate(workspace.id)}
             >
                 {#each workspace.clients as client}
@@ -187,6 +202,7 @@
         background-color: rgba(63, 106, 215, 0.623);
         transition: background-color 0.2s ease-in-out;
     }
+    .active,
     .workspace:hover {
         background-color: rgba(30, 145, 26, 0.728);
         box-shadow: 0px 0px 3px rgba(172, 255, 147, 0.81);
