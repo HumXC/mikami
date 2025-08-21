@@ -1,8 +1,9 @@
 <script lang="ts">
     import Time from "./Time.svelte";
     import Tray from "./Tray.svelte";
-    import { layer, notifd, mika } from "@mika-shell/core";
+    import { layer } from "@mika-shell/core";
     import Workspace from "./Workspace.svelte";
+    import Recording from "./indicator/Recording.svelte";
     layer.init({
         height: 34,
         anchor: ["top", "right", "left"],
@@ -17,12 +18,12 @@
     <div class="left"><Tray /><Workspace /></div>
 
     <div class="center">
-        <div class="center-left">L</div>
+        <div class="center-left"></div>
         <div class="center-center"><Time /></div>
-        <div class="center-right">R</div>
+        <div class="center-right"><Recording /></div>
     </div>
 
-    <div class="right">右</div>
+    <div class="right"></div>
 </div>
 
 <style>
@@ -48,30 +49,26 @@
     }
 
     .center {
-        position: relative;
-        display: flex;
-        flex-shrink: 0;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr; /* 左中右三列 */
         align-items: center;
-        justify-content: center;
-    }
-
-    .center-left,
-    .center-right {
-        flex: 1;
-    }
-
-    .center-left {
-        text-align: right;
-        margin-right: 0.5rem;
+        gap: 0.5rem; /* 可选，左右间距 */
     }
 
     .center-center {
-        flex-shrink: 0;
         text-align: center;
+        justify-self: center;
+        white-space: nowrap;
+    }
+    .center-left {
+        justify-self: end;
+        min-width: 0;
+        text-align: right;
     }
 
     .center-right {
-        text-align: left;
-        margin-left: 0.5rem;
+        justify-self: start;
+        min-width: 0;
+        text-align: right;
     }
 </style>

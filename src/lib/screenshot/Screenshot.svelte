@@ -25,7 +25,6 @@
 
     function CropImage(src: HTMLCanvasElement, rect: Rectangle, scale: number): string {
         const canvas = document.createElement("canvas");
-        console.log(src.width, src.height);
         const x = rect.x * scale;
         const y = rect.y * scale;
         const w = rect.w * scale;
@@ -41,8 +40,14 @@
         layer.close();
     });
 
-    hotkeys("enter,space,ctrl+c", (e) => {
+    hotkeys("enter,space,ctrl+c,ctrl+a", (e) => {
         e.stopPropagation();
+        if (e.ctrlKey && e.key === "a") {
+            selection.x = 0;
+            selection.y = 0;
+            selection.w = canvasElement.width;
+            selection.h = canvasElement.height;
+        }
         (async () => {
             if (!hasSelection(selection)) return;
 
@@ -54,8 +59,7 @@
                 os.exec([
                     "sh",
                     "-c",
-                    `grim -g "${selection.x},${selection.y} ${selection.w}x${selection.h}" ` +
-                        "/tmp/screenshot2.png && cat /tmp/screenshot2.png | wl-copy -t image/png",
+                    "grim /tmp/screenshot2.png && cat /tmp/screenshot2.png | wl-copy -t image/png",
                 ]);
             }
         })().then(() => {
@@ -141,8 +145,8 @@
             if (!isDragging || animationFrameId !== null) return;
             animationFrameId = requestAnimationFrame(() => {
                 animationFrameId = null;
-                let w = e.clientX - pointer.x;
-                let h = e.clientY - pointer.y;
+                let w = e.clientX - pointer.x + 1;
+                let h = e.clientY - pointer.y + 1;
                 selection.w = Math.abs(w);
                 selection.h = Math.abs(h);
                 selection.x = Math.min(e.clientX, pointer.x);

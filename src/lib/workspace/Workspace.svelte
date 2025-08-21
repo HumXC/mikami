@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { apps, icon, layer, monitor } from "@mika-shell/core";
+    import { icon, layer, monitor } from "@mika-shell/core";
     import { hyprland } from "@mika-shell/extra";
+    import hotkeys from "hotkeys-js";
     import { AppWindow } from "lucide-svelte";
     import { onMount } from "svelte";
     const padding = 8;
@@ -16,6 +17,7 @@
 
     layer
         .init({
+            keyboardMode: "none",
             anchor: ["bottom", "top", "right"],
             width: HIDDEN_WIDTH,
             layer: "top",
@@ -98,6 +100,7 @@
                 isShow = true;
                 layer.setSize(LAYER_WIDTH, 0);
                 update();
+                layer.setKeyboardMode("exclusive");
             }
             clearTimeout(timer);
         });
@@ -106,6 +109,7 @@
             timer = setTimeout(() => {
                 layer.setSize(HIDDEN_WIDTH, 0);
                 isShow = false;
+                layer.setKeyboardMode("none");
             }, 100);
         });
     });
@@ -116,7 +120,17 @@
         };
     };
     const desktopEntrys = JSON.parse(localStorage.getItem("app-launcher-apps") || "[]");
+    hotkeys("tab", (e) => {
+        e.preventDefault();
+        for (let i = 0; i < ws.length; i++) {
+            if (ws[i].id === activeWorkspace) {
+                console.log(ws[(i + 1) % ws.length].id);
 
+                activate(ws[(i + 1) % ws.length].id)();
+                break;
+            }
+        }
+    });
     const getIcon = async (className: string) => {
         try {
             return await icon.lookup(className.toLowerCase(), 256);

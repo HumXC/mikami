@@ -25,6 +25,10 @@
         {
             "name": "clipboard",
             "path": "/#/clipboard"
+        },
+        {
+            "name": "wf-recorder",
+            "path": "/#/wf-recorder"
         }
     ],
     "startup": ["bar", "notification", "workspace"]
