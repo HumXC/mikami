@@ -4,6 +4,24 @@
     let pid: number | null = null;
     let file: string | null = null;
     const channel = new BroadcastChannel("wf-recorder");
+    channel.onmessage = (e) => {
+        if (e.data == "request-state" && pid !== null) {
+            channel.postMessage({
+                state: "recording",
+                file: file,
+                region: {
+                    x: selection.x,
+                    y: selection.y,
+                    w: selection.w,
+                    h: selection.h,
+                },
+                startTime: startTime,
+            });
+        }
+        if (e.data == "request-stop") {
+            layer.close();
+        }
+    };
     let startTime: Date | null = null;
     type Rectangle = { x: number; y: number; w: number; h: number };
 
@@ -54,18 +72,20 @@
 
         const dir = getOptionOr("wf-recorder-file", "/tmp");
         file = getFilename(dir);
-        const audio = getOptionOr("wf-recorder-audio", "true") === "true";
+        const audio = getOptionOr("wf-recorder-audio", null);
         const device = getOptionOr("wf-recorder-device", null);
         const codec = getOptionOr("wf-recorder-codec", null);
         const audioCodec = getOptionOr("wf-recorder-audio-codec", null);
         const framerate = getOptionOr("wf-recorder-framerate", null);
         const codecParam = getOptionOr("wf-recorder-codec-param", null);
+        const audioBackend = getOptionOr("wf-recorder-audio-backend", null);
         const cmd = [
             "wf-recorder",
             "-f",
             file,
             `--geometry=${x},${y} ${w}x${h}`,
-            `${audio ? "-a" : ""}`,
+            `${audio ? "--audio=" + audio : ""}`,
+            `${audioBackend ? "--audio-backend=" + audioBackend : ""}`,
             `${device ? "--device=" + device : ""}`,
             `${codec ? "--codec=" + codec : ""}`,
             `${audioCodec ? "--audio-codec=" + audioCodec : ""}`,
@@ -85,6 +105,7 @@
                 w,
                 h,
             },
+            startTime: startTime,
         });
     }
     layer.on("close-request", async () => {

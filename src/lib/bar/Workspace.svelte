@@ -51,7 +51,7 @@
             onclick={() => ws.activate(w.id)}
         >
             <div
-                class=" 
+                class="
                     item
                     absolute transition-all duration-300 ease-out
                     h-2 rounded-full

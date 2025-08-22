@@ -1,7 +1,7 @@
 <script lang="ts">
     import Time from "./Time.svelte";
     import Tray from "./Tray.svelte";
-    import { layer } from "@mika-shell/core";
+    import { layer, mika } from "@mika-shell/core";
     import Workspace from "./Workspace.svelte";
     import Recording from "./indicator/Recording.svelte";
     layer.init({
@@ -12,14 +12,25 @@
         autoExclusiveZone: true,
         backgroundTransparent: true,
     });
+    let toolbar: number | null = null;
+    async function hoverOpenToolbar() {
+        if (toolbar === null) {
+            toolbar = 0;
+            toolbar = await mika.open("toolbar");
+        }
+    }
+    mika.on("close", (id) => {
+        if (id === toolbar) toolbar = null;
+    });
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="container">
     <div class="left"><Tray /><Workspace /></div>
 
     <div class="center">
         <div class="center-left"></div>
-        <div class="center-center"><Time /></div>
+        <div class="center-center" onmouseenter={hoverOpenToolbar}><Time /></div>
         <div class="center-right"><Recording /></div>
     </div>
 
@@ -31,7 +42,7 @@
         @apply flex flex-row justify-between items-center min-w-full min-h-full;
         padding: 0 6px;
         border-radius: 50px;
-        background: #000308a8;
+        background: var(--bg);
     }
 
     .left,

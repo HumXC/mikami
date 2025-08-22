@@ -39,8 +39,23 @@
         e.stopPropagation();
         layer.close();
     });
+    async function screenshot() {
+        if (!hasSelection(selection)) return;
 
-    hotkeys("enter,space,ctrl+c,ctrl+a", (e) => {
+        if (isDrawn) {
+            const cropped = CropImage(canvasElement, selection, await layer.getScale());
+            await os.write("/tmp/screenshot.png", cropped);
+            os.exec(["sh", "-c", "cat /tmp/screenshot.png | wl-copy -t image/png"]);
+        } else {
+            os.exec([
+                "sh",
+                "-c",
+                "grim /tmp/screenshot2.png && cat /tmp/screenshot2.png | wl-copy -t image/png",
+            ]);
+        }
+        await layer.close();
+    }
+    hotkeys("ctrl+a", (e) => {
         e.stopPropagation();
         if (e.ctrlKey && e.key === "a") {
             selection.x = 0;
@@ -48,23 +63,7 @@
             selection.w = canvasElement.width;
             selection.h = canvasElement.height;
         }
-        (async () => {
-            if (!hasSelection(selection)) return;
-
-            if (isDrawn) {
-                const cropped = CropImage(canvasElement, selection, await layer.getScale());
-                await os.write("/tmp/screenshot.png", cropped);
-                os.exec(["sh", "-c", "cat /tmp/screenshot.png | wl-copy -t image/png"]);
-            } else {
-                os.exec([
-                    "sh",
-                    "-c",
-                    "grim /tmp/screenshot2.png && cat /tmp/screenshot2.png | wl-copy -t image/png",
-                ]);
-            }
-        })().then(() => {
-            layer.close();
-        });
+        screenshot();
     });
     hotkeys("f12", (e) => {
         e.stopPropagation();
@@ -155,6 +154,13 @@
         }}
         onmouseup={(e) => {
             isDragging = false;
+            let w = e.clientX - pointer.x + 1;
+            let h = e.clientY - pointer.y + 1;
+            selection.w = Math.abs(w);
+            selection.h = Math.abs(h);
+            selection.x = Math.min(e.clientX, pointer.x);
+            selection.y = Math.min(e.clientY, pointer.y);
+            screenshot();
         }}
     ></canvas>
     <div

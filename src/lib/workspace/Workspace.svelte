@@ -208,21 +208,21 @@
 
 <style>
     .contianer {
-        background-color: #3b3b3bb0;
+        background-color: var(--bg);
         border: 2px solid #aeaeae88;
         box-sizing: border-box;
     }
     .workspace {
-        background-color: rgba(63, 106, 215, 0.623);
+        background-color: rgba(63, 106, 215, 0.453);
         transition: background-color 0.2s ease-in-out;
     }
     .active,
     .workspace:hover {
-        background-color: rgba(30, 145, 26, 0.728);
+        background-color: rgba(30, 145, 26, 0.61);
         box-shadow: 0px 0px 3px rgba(172, 255, 147, 0.81);
     }
     .client {
-        background-color: rgba(191, 191, 191, 0.651);
+        background-color: rgba(191, 191, 191, 0.474);
     }
     .floating {
         background-color: rgba(193, 193, 193, 0.267);

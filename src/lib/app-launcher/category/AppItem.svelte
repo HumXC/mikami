@@ -74,7 +74,7 @@
                 on:click={() => (showActions = !showActions)}
             >
                 <div
-                    class=" transition-transform duration-300 ease-in-out origin-center"
+                    class="transition-transform duration-300 ease-in-out origin-center"
                     class:rotate-180={showActions}
                 >
                     <ChevronDown class="w-4 h-4" />

@@ -5,6 +5,7 @@
     let recording = false;
     let box: HTMLDivElement;
     channel.onmessage = async (event) => {
+        if (event.data.state === undefined) return;
         recording = event.data.state === "recording";
         if (recording) {
             box.style.display = "flex";
@@ -17,6 +18,8 @@
             }, 300);
         }
     };
+    channel.postMessage("request-state");
+
     onMount(() => {
         box.style.display = "none";
     });
@@ -31,7 +34,7 @@
 
 <style>
     .outer {
-        border: 1px solid #e84343e5;
+        border: 1px solid #ffffffcd;
         background-color: #3e3e3e48;
         height: 18px;
         width: 18px;

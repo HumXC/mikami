@@ -29,6 +29,14 @@
         {
             "name": "wf-recorder",
             "path": "/#/wf-recorder"
+        },
+        {
+            "name": "power-menu",
+            "path": "/#/power-menu"
+        },
+        {
+            "name": "toolbar",
+            "path": "/#/toolbar"
         }
     ],
     "startup": ["bar", "notification", "workspace"]
