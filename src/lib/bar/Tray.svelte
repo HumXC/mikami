@@ -1,7 +1,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <script lang="ts">
-    import { tray } from "@mika-shell/core";
+    import { mika, tray } from "@mika-shell/core";
     import { onMount } from "svelte";
     let items: tray.Item[] = [];
     onMount(async () => {
@@ -11,8 +11,6 @@
         items = [...items, await tray.getItem(service)];
     });
     tray.on("removed", (service: string) => {
-        console.log("removed", service);
-
         items = items.filter((item) => item.service !== service);
     });
     tray.on("changed", async (service: string) => {
@@ -24,6 +22,27 @@
         }
         items = [...items];
     });
+    let menu: [string, number] | null = null;
+    mika.on("close", (id) => {
+        if (menu && id === menu[1]) {
+            menu = null;
+        }
+    });
+    async function openMenu(service: string, el: HTMLElement) {
+        const rect = el.getBoundingClientRect();
+        const x = Math.floor(rect.x + rect.width / 2);
+        if (menu) {
+            mika.close(menu[1]);
+        }
+        if (menu && menu[0] === service) {
+            menu = null;
+        } else {
+            menu = [
+                service,
+                await mika.open(`/#/traymenu?service=${encodeURIComponent(service)}&x=${x}`),
+            ];
+        }
+    }
 </script>
 
 {#if items.length !== 0}
@@ -36,7 +55,18 @@
                 transition-all duration-300 ease-out
                 overflow-hidden
             "
-                on:click={() => tray.activate(item.service, 0, 0)}
+                oncontextmenu={async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openMenu(item.service, e.currentTarget);
+                }}
+                onclick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.button === 0) {
+                        tray.activate(item.service, e.clientX, e.clientY);
+                    }
+                }}
             >
                 <img
                     alt=""

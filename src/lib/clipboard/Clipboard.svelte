@@ -212,20 +212,20 @@
 
 <style>
     .input-box {
-        background-color: rgb(88, 88, 88);
+        background-color: var(--bg2);
     }
     .backgorund {
-        background-color: #3b3b3bb0;
+        background-color: var(--bg);
     }
     .content {
         box-sizing: border-box;
-        background-color: rgb(71, 80, 90);
+        background-color: var(--bg2);
         border: 2px solid rgb(83, 87, 94);
         transition:
             background-color 0.1s ease-in-out,
             border 0.1s ease-in-out;
     }
     .selected {
-        background-color: rgb(106, 124, 112);
+        background-color: var(--selected);
     }
 </style>

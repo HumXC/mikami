@@ -11,6 +11,9 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     --bg: rgba(0, 0, 0, 0.7);
+    --bg2: #76767681;
+    --bg3: #25a8ea98;
+    --selected: #44e37e7b;
 }
 
 body {

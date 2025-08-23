@@ -63,8 +63,6 @@
     }
     async function action() {
         if (!hasSelection(selection)) return;
-        console.log(selection);
-
         const x = selection.x;
         const y = selection.y;
         const w = selection.w;

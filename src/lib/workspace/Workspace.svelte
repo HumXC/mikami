@@ -124,8 +124,6 @@
         e.preventDefault();
         for (let i = 0; i < ws.length; i++) {
             if (ws[i].id === activeWorkspace) {
-                console.log(ws[(i + 1) % ws.length].id);
-
                 activate(ws[(i + 1) % ws.length].id)();
                 break;
             }
@@ -205,6 +203,7 @@
         {/each}
     </div>
 </div>
+await
 
 <style>
     .contianer {
@@ -213,12 +212,12 @@
         box-sizing: border-box;
     }
     .workspace {
-        background-color: rgba(63, 106, 215, 0.453);
+        background-color: var(--bg3);
         transition: background-color 0.2s ease-in-out;
     }
     .active,
     .workspace:hover {
-        background-color: rgba(30, 145, 26, 0.61);
+        background-color: var(--selected);
         box-shadow: 0px 0px 3px rgba(172, 255, 147, 0.81);
     }
     .client {

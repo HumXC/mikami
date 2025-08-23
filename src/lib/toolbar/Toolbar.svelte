@@ -58,7 +58,6 @@
             }
             recordInterval = setInterval(() => {
                 recordDuration += 1;
-                console.log(recordDuration);
             }, 1000);
         }
         if (event.data.state === "done") {
@@ -122,7 +121,7 @@
             {/if}
         </div>
         <!-- 防止撑大grid -->
-        <div id="tools" class=" aspect-square h-full rounded-lg grid grid-cols-2 grid-rows-2 gap-2">
+        <div id="tools" class="aspect-square h-full rounded-lg grid grid-cols-2 grid-rows-2 gap-2">
             <button
                 onclick={() => {
                     document.body.style.visibility = "hidden";
@@ -164,22 +163,19 @@
 </div>
 
 <style>
-    button {
-        border-radius: 8px;
-        background-color: #3d3d3d;
-    }
     #toolbar {
         background-color: var(--bg);
     }
     #info {
-        background-color: #25a8ea98;
+        background-color: var(--bg3);
     }
     button,
     #tips {
-        background-color: #ffffff16;
+        background-color: var(--bg2);
         color: #ffffffc6;
     }
     button {
+        border-radius: 8px;
         min-width: 0;
         min-height: 0;
         overflow: hidden;
@@ -187,7 +183,7 @@
         position: relative;
     }
     button:hover {
-        background-color: #44e37e7b;
+        background-color: var(--selected);
         cursor: pointer;
     }
 </style>
