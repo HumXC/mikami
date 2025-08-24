@@ -3,24 +3,64 @@ import { convertToPinyin } from "tiny-pinyin";
 import { Sleep } from "../../utils";
 // TODO: 去除 AppLauncher.svelte 中的 apps
 export const Apps: Map<string, Application> = new Map();
-export async function InitApps() {
-    const result = JSON.parse(localStorage.getItem("app-launcher-apps") || "[]") as Application[];
-    result.forEach((app) => {
-        Apps.set(app.id, app);
-    });
-    ListApps().then((apps) => {
-        localStorage.setItem("app-launcher-apps", JSON.stringify(apps));
-    });
+export const apps: Map<string, Application> = new Map(
+    JSON.parse(localStorage.getItem("app-launcher-apps") || "[]")
+);
+
+export const appsByName: Map<string, Application[]> = new Map(
+    JSON.parse(localStorage.getItem("app-launcher-apps-by-name") || "[]")
+);
+export const appsByCategory: Map<string, Application[]> = new Map(
+    JSON.parse(localStorage.getItem("app-launcher-apps-by-category") || "[]")
+);
+function makeAppsByName(apps: Application[]) {
+    return apps.reduce((acc, app) => {
+        const name = app.name || "";
+        const firstChar = name[0] || "";
+        const py = convertToPinyin(firstChar);
+        let letter = py?.[0]?.[0]?.toUpperCase?.() || "#";
+        if (!/^[A-Z]$/.test(letter)) {
+            letter = "#";
+        }
+        if (!acc.has(letter)) {
+            acc.set(letter, []);
+        }
+        acc.get(letter)!.push(app);
+        return acc;
+    }, new Map());
 }
-let mouseX = 0;
-let mouseY = 0;
-document.addEventListener("mousemove", (event) => {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
-});
-export function MouseHasMoved(x: number, y: number): boolean {
-    return mouseX !== x || mouseY !== y;
+function makeAppsByCategory(apps: Application[]) {
+    return apps.reduce((acc, app) => {
+        const category = app.categories || ["Others"];
+        for (const cat of category) {
+            if (!acc.has(cat)) {
+                acc.set(cat, []);
+            }
+            acc.get(cat)!.push(app);
+        }
+        return acc;
+    }, new Map());
 }
+(async () => {
+    const lastUpdateTime = Number(localStorage.getItem("app-launcher-last-update-time") || "0");
+    const updateInterval = 1000 * 60;
+    const now = new Date().getTime();
+
+    if (now - lastUpdateTime > updateInterval) {
+        const apps = await ListApps();
+        const byName = makeAppsByName(apps);
+        const byCategory = makeAppsByCategory(apps);
+        const appsMap = new Map(apps.map((app) => [app.id, app]));
+        localStorage.setItem("app-launcher-apps", JSON.stringify(Array.from(appsMap)));
+        localStorage.setItem("app-launcher-apps-by-name", JSON.stringify(Array.from(byName)));
+        localStorage.setItem(
+            "app-launcher-apps-by-category",
+            JSON.stringify(Array.from(byCategory))
+        );
+
+        localStorage.setItem("app-launcher-last-update-time", String(now));
+    }
+})();
 
 export type Application = App.Entry & {
     iconData: string;

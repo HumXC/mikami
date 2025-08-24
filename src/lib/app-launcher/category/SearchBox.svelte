@@ -10,8 +10,10 @@
 </script>
 
 <div
-    class="flex items-center justify-between border rounded-lg px-3 py-2 shadow-sm transition-all
-        border-gray-600 bg-gray-900/80"
+    class="flex items-center justify-between
+        border rounded-lg px-3 py-2 shadow-sm transition-all
+        border-gray-400
+        bg-[var(--bg2)]"
 >
     <input
         class="flex-1 bg-transparent outline-none text-sm text-gray-200"

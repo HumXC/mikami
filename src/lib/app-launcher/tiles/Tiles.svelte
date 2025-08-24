@@ -1,18 +1,13 @@
 <script lang="ts">
     import "gridstack/dist/gridstack.min.css";
     import { GridStack } from "gridstack";
-    import { onMount, tick } from "svelte";
-    import { __initGrid, cellSize, type TileOption } from "./utils";
-    import { Sleep } from "../../../utils";
+    import { onMount } from "svelte";
+    import { __initGrid, cellSize, MountTile, type TileOption } from "./utils";
     let containerRef: HTMLDivElement;
-    let grid: GridStack;
-    let width: number = 0;
-    let height: number = 0;
-    export let onLoaded: () => void = () => {};
-    function keepGridHeight() {
-        // @ts-ignore
-        grid.el.style["min-height"] = `${height}px`;
-    }
+    let grid: GridStack | null = null;
+    let height = 0;
+    const padding = 16;
+
     const tiles = JSON.parse(localStorage.getItem("app-launcher-tiles") || "[]");
     function updateTile(el: HTMLElement) {
         const w = el.getAttribute("gs-w");
@@ -20,6 +15,7 @@
         const x = el.getAttribute("gs-x");
         const y = el.getAttribute("gs-y");
         const id = el.getAttribute("data-tile-id");
+
         if (!id) {
             console.error("data-tile-id not found", el);
             return;
@@ -34,17 +30,31 @@
         tile.x = parseInt(x || "0");
         tile.y = parseInt(y || "0");
     }
-    // FIXME: 第一个加载的 Tile 没动画
-    function initGrid(e: HTMLElement) {
-        // FIXME: 如果grid columns 为1，item的size会跟随窗口缩放而更改其 h,w
+    function initGrid(e: HTMLElement, cellSize: number, width: number, height: number) {
         grid = GridStack.addGrid(e, {
             float: true,
             resizable: { handles: "se" },
             cellHeight: cellSize,
             layout: "compact",
             removable: ".tile-trash",
+            animate: false,
             acceptWidgets: (el) => true,
         });
+        function keepGridHeight() {
+            requestAnimationFrame(() => {
+                // @ts-ignore
+                grid.el.style["min-height"] = `${height - padding * 2}px`;
+            });
+        }
+
+        const column = Math.floor(width / cellSize);
+        grid.column(column);
+        keepGridHeight();
+        __initGrid(grid);
+        for (let i = 0; i < tiles.length; i++) {
+            MountTile(tiles[i], i);
+        }
+        grid.setAnimation(true, true);
 
         grid.on("change", (e, nodes) => {
             nodes.forEach((node) => {
@@ -68,6 +78,7 @@
             keepGridHeight();
             localStorage.setItem("app-launcher-tiles", JSON.stringify(tiles));
         });
+
         grid.on("added", (e, nodes) => {
             if (nodes.length > 1) {
                 console.error("multiple nodes added, don't know what to do", nodes);
@@ -79,34 +90,33 @@
             }
             const content = node.el!.querySelector(".tile")!;
 
-            const appEntryPath = content.getAttribute("data-app-entry-path")!;
+            const appEntryId = content.getAttribute("data-app-entry-id")!;
             const tile: TileOption = {
                 x: node.x || 0,
                 y: node.y || 0,
                 w: node.w || 1,
                 h: node.h || 1,
                 type: "app",
-                data: appEntryPath,
+                data: appEntryId,
             };
             node.el!.setAttribute("data-tile-id", tiles.length);
             tiles.push(tile);
             keepGridHeight();
             localStorage.setItem("app-launcher-tiles", JSON.stringify(tiles));
         });
-        __initGrid(grid);
-        Sleep(100).then(onLoaded);
     }
 
     onMount(() => {
-        const observer = new ResizeObserver(([entry]) => {
-            width = entry.contentRect.width;
-            height = entry.contentRect.height;
-            if (grid) {
-                const column = Math.floor(width / cellSize);
-                grid.column(column);
-                grid.cellHeight(width / column);
-                keepGridHeight();
-            }
+        const observer = new ResizeObserver(() => {
+            const rect = containerRef.getBoundingClientRect();
+            requestAnimationFrame(() => {
+                if (grid) {
+                    grid.destroy(true);
+                    initGrid(containerRef, cellSize, rect.width, rect.height);
+                } else {
+                    initGrid(containerRef, cellSize, rect.width, rect.height);
+                }
+            });
         });
         observer.observe(containerRef);
         return () => observer.disconnect();
@@ -114,7 +124,11 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="grid-container w-full h-full" use:initGrid bind:this={containerRef}></div>
+<div
+    class="grid-container w-full h-full"
+    style:padding={padding + "px"}
+    bind:this={containerRef}
+></div>
 
 <style>
     .grid-container {

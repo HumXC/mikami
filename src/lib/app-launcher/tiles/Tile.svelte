@@ -1,11 +1,10 @@
 <script lang="ts">
     import type { TileOption } from "./utils";
     import AppTile from "./AppTile.svelte";
-    import { Apps } from "../common";
     export let tile: TileOption;
 </script>
 
-<!-- Tile 的实现应当包含 tile class -->
+<!-- Tile 的实现的 classList 中应当包含 "tile" 类 -->
 {#if tile.type === "app"}
-    <AppTile app={Apps.get(tile.data as string)!} />
+    <AppTile option={tile} />
 {/if}

@@ -2,7 +2,7 @@
     import { ChevronDown } from "lucide-svelte";
     import AppItem from "./AppItem.svelte";
     import { slide } from "svelte/transition";
-    import { MouseHasMoved, type Application } from "../common";
+    import { type Application } from "../common";
     import { Sleep } from "../../../utils";
     export const unexpand = () => (expand_ = false);
     export const expand = () => (expand_ = true);
@@ -29,7 +29,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
     on:mousemove={(e) => {
-        if (MouseHasMoved(e.x, e.y)) hasFocus = true;
+        hasFocus = true;
     }}
     on:mouseleave={() => (hasFocus = false)}
     class="category flex flex-col rounded-sm"
@@ -87,8 +87,7 @@
             padding-left 0.1s ease-in-out;
     }
     .hover {
-        /* FIXME: 这个配色感觉有点丑 */
-        background-color: rgba(93, 227, 113, 0.511);
+        background-color: var(--selected);
         padding-left: 6px;
     }
 </style>

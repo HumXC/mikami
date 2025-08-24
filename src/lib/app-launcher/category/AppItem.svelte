@@ -1,6 +1,6 @@
 <script lang="ts">
     import { ChevronDown } from "lucide-svelte";
-    import { MouseHasMoved, OnAppRun, type Application } from "../common";
+    import { OnAppRun, type Application } from "../common";
     import { SetupDargAndDrop } from "../tiles/utils";
     import { apps as App } from "@mika-shell/core";
     import { slide } from "svelte/transition";
@@ -22,7 +22,7 @@
         drags.push(e);
         drags = drags;
     }
-    $: drags.forEach((e) => e.setAttribute("data-app-entry-path", app.id));
+    $: drags.forEach((e) => e.setAttribute("data-app-entry-id", app.id));
 </script>
 
 <!-- svelte-ignore a11y_missing_attribute -->
@@ -32,7 +32,7 @@
         class="flex items-center justify-between rounded-sm"
         use:canDrag
         on:mousemove={(e) => {
-            if (MouseHasMoved(e.x, e.y)) buttonRef?.focus();
+            buttonRef?.focus();
         }}
         on:mouseleave={() => buttonRef?.blur()}
     >
@@ -106,7 +106,7 @@
 
 <style>
     .app-item {
-        background-color: rgba(44, 51, 63, 0.705);
+        background-color: var(--bg2);
     }
     .expend-button {
         background-color: rgba(255, 255, 255, 0.118);

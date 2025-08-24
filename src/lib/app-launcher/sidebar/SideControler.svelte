@@ -37,7 +37,6 @@
 
 <style>
     .box {
-        background-color: rgb(9, 15, 26);
-        border: rgba(20, 28, 44, 0.89) 2px solid;
+        background-color: var(--bg);
     }
 </style>

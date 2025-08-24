@@ -22,13 +22,13 @@
         align-items: center;
         justify-content: space-between;
         width: 100%;
-        background-color: #1f2736e3;
+        background-color: var(--bg2);
         border-radius: 0.375rem;
         padding: 0.2rem;
         transition: background-color 0.1s ease-in-out;
     }
     button:hover {
-        background-color: #2f5d41;
+        background-color: var(--selected);
     }
     .text {
         font-size: 0.9rem;

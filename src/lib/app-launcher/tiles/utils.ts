@@ -70,9 +70,9 @@ export function NewTile(tile: TileOption) {
 export function SetupDargAndDrop(e: HTMLElement) {
     const helper = (ee: HTMLElement) => {
         // FIXME: 拖放的元素和放置的元素具有不同的尺寸，这不对
-        const entryPath = ee.getAttribute("data-app-entry-path");
-        if (!entryPath) {
-            throw new Error("Invalid data-app-entry-path");
+        const entryId = ee.getAttribute("data-app-entry-id");
+        if (!entryId) {
+            throw new Error("Invalid data-app-entry-id");
         }
         const tile: TileOption = {
             x: 0,
@@ -80,7 +80,7 @@ export function SetupDargAndDrop(e: HTMLElement) {
             w: 2,
             h: 2,
             type: "app",
-            data: entryPath,
+            data: entryId,
         };
         const newEl = NewTile(tile);
         return newEl;
