@@ -50,8 +50,11 @@
         {#each items as item}
             <div
                 class="
+                bg-[#9696966b]
+                rounded-xl
+                p-0.5
                 flex items-center justify-center
-                h-6 w-6 p-0.5
+                h-6 w-6
                 transition-all duration-300 ease-out
                 overflow-hidden
             "
@@ -75,9 +78,7 @@
                     w-full
                     h-full
                     transition-all duration-300 ease-out
-                    rounded-full
                     flex items-center justify-center
-                    overflow-hidden
                 "
                 />
             </div>

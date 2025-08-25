@@ -26,7 +26,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="container">
-    <div class="left"><Tray /><Workspace /></div>
+    <div class="left pl-0.5"><Tray /><Workspace /></div>
 
     <div class="center">
         <div class="center-left"></div>
@@ -34,7 +34,7 @@
         <div class="center-right"><Recording /></div>
     </div>
 
-    <div class="right"></div>
+    <div class="right pr-0.5"></div>
 </div>
 
 <style>
