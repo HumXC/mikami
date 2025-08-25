@@ -11,7 +11,7 @@
         anchor: ["top", "right", "left", "bottom"],
         layer: "top",
         exclusiveZone: -1,
-        keyboardMode: "exclusive",
+        keyboardMode: "ondemand",
         backgroundTransparent: true,
     });
     document.addEventListener("keydown", (e) => {

@@ -1,6 +1,5 @@
 import { apps as App, icon as Icon, layer } from "@mika-shell/core";
 import { convertToPinyin } from "tiny-pinyin";
-import { Sleep } from "../../utils";
 // TODO: 去除 AppLauncher.svelte 中的 apps
 export const Apps: Map<string, Application> = new Map();
 export const apps: Map<string, Application> = new Map(

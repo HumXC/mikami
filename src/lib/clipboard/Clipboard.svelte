@@ -1,10 +1,11 @@
 <script lang="ts">
-    import { os, window, layer } from "@mika-shell/core";
+    import { os, window } from "@mika-shell/core";
     import { hyprland } from "@mika-shell/extra";
-    import { onMount, tick } from "svelte";
+    import { onMount } from "svelte";
     import { Search } from "lucide-svelte";
     import hotkeys from "hotkeys-js";
     import Fuse from "fuse.js";
+    import { ensureVisible, KeyController, passControlKey } from "../../utils";
     let selected: number = -1;
     type Record = {
         id: number;
@@ -69,12 +70,7 @@
     };
     hyprland.event.on("activewindow", hyprlandHelper);
     const onMousemove = (e: MouseEvent) => {
-        if (keyControl) {
-            setTimeout(() => {
-                keyControl = false;
-            }, 50);
-            return;
-        }
+        if (keyControl.isInControl()) return;
         const target = e.target as HTMLElement;
         selected = Number(target.dataset.index!);
     };
@@ -112,17 +108,17 @@
     hotkeys("esc", () => {
         window.close();
     });
-    let keyControl = false;
+    let keyControl = new KeyController();
     hotkeys("up,left,shift+tab", (e) => {
         e.preventDefault();
-        keyControl = true;
+        keyControl.control();
         if (selected < 0) return;
         selected = selected - 1 < 0 ? records.length - 1 : selected - 1;
-        ensureVisible();
+        ensureVisible(containerRef, document.querySelector(`[data-index="${selected}"]`)!);
     });
     hotkeys("shift+up,shift+left", (e) => {
         e.preventDefault();
-        keyControl = true;
+        keyControl.control();
         if (selected < 0) return;
         selected = 0;
         const container = document.querySelector(".container") as HTMLElement;
@@ -130,33 +126,15 @@
     });
     hotkeys("down,right,tab", (e) => {
         e.preventDefault();
-        keyControl = true;
+        keyControl.control();
         if (selected < 0) return;
         selected = selected + 1 >= records.length ? 0 : selected + 1;
-        ensureVisible();
+        ensureVisible(containerRef, document.querySelector(`[data-index="${selected}"]`)!);
     });
     hotkeys("enter", () => {
         copyAndPaste();
         window.close();
     });
-    async function ensureVisible() {
-        await tick();
-        const container = document.querySelector(".container") as HTMLElement;
-        const el = document.querySelector(`[data-index="${selected}"]`) as HTMLElement;
-        if (!container || !el) return;
-
-        const containerTop = container.scrollTop;
-        const containerBottom = containerTop + container.clientHeight;
-
-        const elTop = el.offsetTop;
-        const elBottom = elTop + el.offsetHeight;
-
-        if (elTop < containerTop) {
-            container.scrollTo({ top: elTop, behavior: "smooth" });
-        } else if (elBottom > containerBottom) {
-            container.scrollTo({ top: elBottom - container.clientHeight, behavior: "smooth" });
-        }
-    }
 
     const onInputChange = async (e: Event) => {
         const value = input.value.trim();
@@ -171,17 +149,16 @@
         if (records.length > 0) {
             selected = 0;
         }
-        ensureVisible();
+        ensureVisible(containerRef, document.querySelector(`[data-index="${selected}"]`)!);
     };
-    const onInputKeyDown = async (e: KeyboardEvent) => {
-        const container = document.querySelector(".container") as HTMLElement;
-        container.dispatchEvent(new KeyboardEvent("keydown", e));
-    };
+    let containerRef: HTMLDivElement;
     document.addEventListener("keydown", (e) => {
         input.focus();
     });
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="backgorund w-full h-full flex flex-col p-3">
     <div class="input-box p-3 rounded-xl flex items-center w-full mb-3">
         <Search />
@@ -190,13 +167,14 @@
             class="ml-2 w-full"
             placeholder="Search"
             oninput={onInputChange}
-            onkeydown={onInputKeyDown}
+            use:passControlKey
         />
     </div>
-    <div class="container gap-3 flex flex-col overflow-y-auto overflow-x-hidden">
+    <div
+        bind:this={containerRef}
+        class="container gap-3 flex flex-col overflow-y-auto overflow-x-hidden"
+    >
         {#each records as { id, content }, i}
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
             <div
                 class="content p-2 rounded-md"
                 data-index={i}

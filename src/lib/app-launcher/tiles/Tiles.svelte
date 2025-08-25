@@ -2,13 +2,24 @@
     import "gridstack/dist/gridstack.min.css";
     import { GridStack } from "gridstack";
     import { onMount } from "svelte";
-    import { __initGrid, cellSize, MountTile, type TileOption } from "./utils";
+    import { cellSize, NewTile, type TileOption } from "./utils";
     let containerRef: HTMLDivElement;
     let grid: GridStack | null = null;
-    let height = 0;
     const padding = 16;
 
     const tiles = JSON.parse(localStorage.getItem("app-launcher-tiles") || "[]");
+    function MountTile(tile: TileOption, id: number) {
+        if (!grid) {
+            throw new Error("Grid not initialized");
+        }
+        if (!grid.willItFit({ x: tile.x, y: tile.y, w: tile.w, h: tile.h })) {
+            throw new Error("Not enough free space to place the widget on the grid");
+        }
+        const item = NewTile(tile);
+
+        item.setAttribute("data-tile-id", id.toString());
+        return grid.makeWidget(item);
+    }
     function updateTile(el: HTMLElement) {
         const w = el.getAttribute("gs-w");
         const h = el.getAttribute("gs-h");
@@ -50,7 +61,6 @@
         const column = Math.floor(width / cellSize);
         grid.column(column);
         keepGridHeight();
-        __initGrid(grid);
         for (let i = 0; i < tiles.length; i++) {
             MountTile(tiles[i], i);
         }
@@ -85,6 +95,7 @@
                 return;
             }
             const node = nodes[0];
+            // 被拖动而新增的节点，没有data-tile-id属性
             if (node.el!.getAttribute("data-tile-id") !== null) {
                 return;
             }

@@ -4,6 +4,7 @@ import Traymenu from "./lib/bar/traymenu/Traymenu.svelte";
 import Clipboard from "./lib/clipboard/Clipboard.svelte";
 import Notification from "./lib/notification/Notification.svelte";
 import Powermenu from "./lib/power-menu/Powermenu.svelte";
+import QuickRun from "./lib/quick-run/QuickRun.svelte";
 import Screenshot from "./lib/screenshot/Screenshot.svelte";
 import Toolbar from "./lib/toolbar/Toolbar.svelte";
 import Recorder from "./lib/wf-recorder/Recorder.svelte";
@@ -19,4 +20,5 @@ export default {
     "/power-menu": Powermenu,
     "/toolbar": Toolbar,
     "/traymenu": Traymenu,
+    "/quick-run": QuickRun,
 };

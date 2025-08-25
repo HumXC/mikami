@@ -3,7 +3,7 @@
     import AppItem from "./AppItem.svelte";
     import { slide } from "svelte/transition";
     import { type Application } from "../common";
-    import { Sleep } from "../../../utils";
+    import { tick } from "svelte";
     export const unexpand = () => (expand_ = false);
     export const expand = () => (expand_ = true);
     export const getCategory = () => category;
@@ -61,7 +61,7 @@
     {#if expand_}
         <div
             on:introend={async () => {
-                await Sleep(0);
+                await tick();
                 focusFirstApp && appsRef[0]?.getFocus();
                 focusFirstApp = false;
             }}

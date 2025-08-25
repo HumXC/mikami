@@ -37,6 +37,10 @@
         {
             "name": "toolbar",
             "path": "/#/toolbar"
+        },
+        {
+            "name": "quick-run",
+            "path": "/#/quick-run"
         }
     ],
     "startup": ["bar", "notification", "workspace"]

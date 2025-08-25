@@ -1,7 +1,7 @@
 <script lang="ts">
     import { layer, os } from "@mika-shell/core";
     import { onMount } from "svelte";
-    import { Sleep } from "../../utils";
+    import { sleep } from "../../utils";
     import hotkeys from "hotkeys-js";
     let canvasElement: HTMLCanvasElement;
     let isDrawn = false;
@@ -114,7 +114,7 @@
                 img.src = `data:image/png;base64,${data}`;
                 break;
             } catch {}
-            await Sleep(20);
+            await sleep(20);
         }
     });
 

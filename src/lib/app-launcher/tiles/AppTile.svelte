@@ -62,7 +62,7 @@
     on:click={RunApp}
     bind:this={tileEl}
     data-app-entry-id={option.data}
-    class="tile w-full h-full flex flex-col justify-center items-center rounded-lg backdrop-blur-xl"
+    class="tile w-full h-full flex flex-col justify-center items-center rounded-lg"
 >
     {#if app}
         <img
