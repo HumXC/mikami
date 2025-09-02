@@ -43,13 +43,24 @@ export class KeyController {
         }, this.timeout);
     }
 }
-export function passControlKey(el: HTMLInputElement) {
-    el.addEventListener("keydown", (e) => {
-        if (e.shiftKey || ["Enter", "ArrowDown", "ArrowUp", "Tab"].includes(e.key)) {
+export function passControlKey(
+    el: HTMLInputElement,
+    keys: string[] = ["Enter", "ArrowDown", "ArrowUp", "Tab"]
+) {
+    function handler(e: KeyboardEvent) {
+        if (e.shiftKey || keys.includes(e.code)) {
             (e.target as HTMLInputElement).blur();
             e.preventDefault();
             e.stopPropagation();
             document.dispatchEvent(new KeyboardEvent("keydown", e));
         }
-    });
+    }
+
+    el.addEventListener("keydown", handler);
+
+    return {
+        destroy() {
+            el.removeEventListener("keydown", handler);
+        },
+    };
 }

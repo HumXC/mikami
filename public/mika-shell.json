@@ -1,47 +1,15 @@
 {
-    "name": "Example",
-    "description": "This is an example mika-shell configuration file",
-    "pages": [
-        {
-            "name": "bar",
-            "path": "/#/bar"
-        },
-        {
-            "name": "notification",
-            "path": "/#/notification"
-        },
-        {
-            "name": "screenshot",
-            "path": "/#/screenshot"
-        },
-        {
-            "name": "app-launcher",
-            "path": "/#/app-launcher"
-        },
-        {
-            "name": "workspace",
-            "path": "/#/workspace"
-        },
-        {
-            "name": "clipboard",
-            "path": "/#/clipboard"
-        },
-        {
-            "name": "wf-recorder",
-            "path": "/#/wf-recorder"
-        },
-        {
-            "name": "power-menu",
-            "path": "/#/power-menu"
-        },
-        {
-            "name": "toolbar",
-            "path": "/#/toolbar"
-        },
-        {
-            "name": "quick-run",
-            "path": "/#/quick-run"
-        }
-    ],
+    "alias": {
+        "bar": "/#/bar",
+        "notification": "/#/notification",
+        "screenshot": "/#/screenshot",
+        "app-launcher": "/#/app-launcher",
+        "workspace": "/#/workspace",
+        "clipboard": "/#/clipboard",
+        "wf-recorder": "/#/wf-recorder",
+        "power-menu": "/#/power-menu",
+        "toolbar": "/#/toolbar",
+        "quick-run": "/#/quick-run"
+    },
     "startup": ["bar", "notification", "workspace"]
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { layer, os } from "@mika-shell/core";
+    import { layer, monitor, os } from "@mika-shell/core";
     import { onMount } from "svelte";
     import { sleep } from "../../utils";
     import hotkeys from "hotkeys-js";
@@ -47,11 +47,9 @@
             await os.write("/tmp/screenshot.png", cropped);
             os.exec(["sh", "-c", "cat /tmp/screenshot.png | wl-copy -t image/png"]);
         } else {
-            os.exec([
-                "sh",
-                "-c",
-                "grim /tmp/screenshot2.png && cat /tmp/screenshot2.png | wl-copy -t image/png",
-            ]);
+            const img = await monitor.capture(0, 100, false, selection);
+            await os.write("/tmp/screenshot.png", img.replace("data:image/webp;base64,", ""));
+            os.exec(["sh", "-c", "cat /tmp/screenshot.png | wl-copy -t image/png"]);
         }
         await layer.close();
     }
@@ -82,12 +80,6 @@
         });
         ro.observe(window.document.body);
         const img = new Image();
-        await os.exec(["rm", "/tmp/screenshot.png"]);
-        os.exec([
-            "sh",
-            "-c",
-            "grim /tmp/screenshot_tmp.png && mv /tmp/screenshot_tmp.png /tmp/screenshot.png",
-        ]);
         img.onload = async () => {
             const canvas = canvasElement;
             const ctx = canvasElement.getContext("2d")!;
@@ -108,14 +100,7 @@
             ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
             isDrawn = true;
         };
-        for (let i = 0; i < 500; i++) {
-            try {
-                const data = await os.read("/tmp/screenshot.png");
-                img.src = `data:image/png;base64,${data}`;
-                break;
-            } catch {}
-            await sleep(20);
-        }
+        monitor.capture(0, 100).then((src) => (img.src = src));
     });
 
     function hasSelection(selection: Rectangle) {

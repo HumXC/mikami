@@ -16,7 +16,7 @@
     let records: Record[] = [];
     let input: HTMLInputElement;
     onMount(async () => {
-        const payload = await os.exec(["cliphist", "list"], { needOutput: true });
+        const payload = await os.exec(["cliphist", "list"], "string");
         payload?.split("\n").forEach((line) => {
             if (line.length === 0) return;
             const [id, content] = line.split("\t");
@@ -75,9 +75,7 @@
         selected = Number(target.dataset.index!);
     };
     const isFileUrl = async (id: number) => {
-        const payload = await os.exec(["cliphist", "decode", id.toString()], {
-            needOutput: true,
-        });
+        const payload = await os.exec(["cliphist", "decode", id.toString()], "string");
         if (payload) {
             return payload!.startsWith("file://");
         }
@@ -167,7 +165,7 @@
             class="ml-2 w-full"
             placeholder="Search"
             oninput={onInputChange}
-            use:passControlKey
+            use:passControlKey={["Enter", "ArrowDown", "ArrowUp", "Tab", "Space"]}
         />
     </div>
     <div
