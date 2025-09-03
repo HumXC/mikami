@@ -39,6 +39,9 @@
             input.focus();
         });
     });
+    hotkeys("esc", (e) => {
+        layer.close();
+    });
     hotkeys("f12", (e) => {
         e.stopPropagation();
         layer.openDevTools();

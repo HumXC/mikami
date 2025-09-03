@@ -165,7 +165,7 @@
             class="ml-2 w-full"
             placeholder="Search"
             oninput={onInputChange}
-            use:passControlKey={["Enter", "ArrowDown", "ArrowUp", "Tab", "Space"]}
+            use:passControlKey={["Enter", "ArrowDown", "ArrowUp", "Tab", "Space", "Escape"]}
         />
     </div>
     <div

@@ -68,13 +68,9 @@ async function parseShellData(shell: string): Promise<Payload[]> {
     const shell_ = shell.split("/").pop() || "";
     if (!["bash", "fish"].includes(shell_)) return [];
     const parser = (shellParser as any)[shell_];
-    const aliases = (await os.exec(parser.alias.cmd, {
-        needOutput: true,
-    })) as string;
+    const aliases = await os.exec(parser.alias.cmd, "string");
 
-    const functions = (await os.exec(parser.functions.cmd, {
-        needOutput: true,
-    })) as string;
+    const functions = await os.exec(parser.functions.cmd, "string");
     return [...parser.alias.parse(aliases), ...parser.functions.parse(functions)];
 }
 const _ = null;

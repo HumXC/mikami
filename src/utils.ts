@@ -45,7 +45,7 @@ export class KeyController {
 }
 export function passControlKey(
     el: HTMLInputElement,
-    keys: string[] = ["Enter", "ArrowDown", "ArrowUp", "Tab"]
+    keys: string[] = ["Enter", "ArrowDown", "ArrowUp", "Tab", "Escape"]
 ) {
     function handler(e: KeyboardEvent) {
         if (e.shiftKey || keys.includes(e.code)) {

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { layer, monitor, os } from "@mika-shell/core";
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
     import { sleep } from "../../utils";
     import hotkeys from "hotkeys-js";
     let canvasElement: HTMLCanvasElement;
@@ -33,7 +33,7 @@
         canvas.height = h;
         const ctx = canvas.getContext("2d")!;
         ctx.drawImage(src, x, y, w, h, 0, 0, w, h);
-        return canvas.toDataURL("image/png").replace("data:image/png;base64,", "");
+        return canvas.toDataURL("image/png", 1).replace("data:image/png;base64,", "");
     }
     hotkeys("esc", (e) => {
         e.stopPropagation();
@@ -41,17 +41,24 @@
     });
     async function screenshot() {
         if (!hasSelection(selection)) return;
-
+        // 避免选框出现在截图中
+        document.getElementById("highlight")!.style.display = "none";
+        await tick();
+        await tick();
+        await tick();
         if (isDrawn) {
             const cropped = CropImage(canvasElement, selection, await layer.getScale());
             await os.write("/tmp/screenshot.png", cropped);
             os.exec(["sh", "-c", "cat /tmp/screenshot.png | wl-copy -t image/png"]);
+            layer.close();
         } else {
-            const img = await monitor.capture(0, 100, false, selection);
-            await os.write("/tmp/screenshot.png", img.replace("data:image/webp;base64,", ""));
+            const image = await monitor.capture(0, selection, {
+                encode: "png",
+            });
+            await os.write("/tmp/screenshot.png", image.replace("data:image/png;base64,", ""));
             os.exec(["sh", "-c", "cat /tmp/screenshot.png | wl-copy -t image/png"]);
+            layer.close();
         }
-        await layer.close();
     }
     hotkeys("ctrl+a", (e) => {
         e.stopPropagation();
@@ -88,8 +95,8 @@
             const dpr = await layer.getScale();
 
             // 设置 canvas 内部像素大小
-            canvas.width = cssWidth * dpr;
-            canvas.height = cssHeight * dpr;
+            canvas.width = img.width;
+            canvas.height = img.height;
 
             // CSS 显示大小不变
             canvas.style.width = cssWidth + "px";
@@ -100,7 +107,7 @@
             ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
             isDrawn = true;
         };
-        monitor.capture(0, 100).then((src) => (img.src = src));
+        monitor.capture(0, null, { encode: "png" }).then((src) => (img.src = src));
     });
 
     function hasSelection(selection: Rectangle) {
@@ -149,7 +156,8 @@
         }}
     ></canvas>
     <div
-        class="highlight absolute z-50"
+        id="highlight"
+        class="absolute z-50"
         style:width={selection.w + 1 + "px"}
         style:height={selection.h + 1 + "px"}
         style:left={selection.x - 1 + "px"}
@@ -159,7 +167,7 @@
 </div>
 
 <style>
-    .highlight {
+    #highlight {
         outline: 2px solid #fff;
         background-color: transparent;
         pointer-events: none;
