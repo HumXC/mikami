@@ -1,7 +1,13 @@
 import { tick } from "svelte";
-import type { TileOption } from "./lib/app-launcher/tiles/utils";
 export async function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+export function getHashSearchParams() {
+    const h = globalThis.location.hash || "";
+    const qIdx = h.indexOf("?");
+    if (qIdx === -1) return new URLSearchParams();
+    const query = h.slice(qIdx + 1).split("#")[0]; // 去掉 '? 之前' 和任何后续 '#'
+    return new URLSearchParams(query);
 }
 // container: 父元素，el: 子元素
 // 将子元素滚动到可见区域

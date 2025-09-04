@@ -4,6 +4,10 @@
     import { layer, mika } from "@mika-shell/core";
     import Workspace from "./Workspace.svelte";
     import Recording from "./indicator/Recording.svelte";
+    import * as services from "./services";
+    import Notification from "./indicator/Notification.svelte";
+    import { onMount } from "svelte";
+    let notifyIcon: Notification;
     layer.init({
         height: 34,
         anchor: ["top", "right", "left"],
@@ -19,6 +23,9 @@
             toolbar = await mika.open("toolbar");
         }
     }
+    onMount(() => {
+        services.notify(notifyIcon);
+    });
     mika.on("close", (id) => {
         if (id === toolbar) toolbar = null;
     });
@@ -34,7 +41,9 @@
         <div class="center-right"><Recording /></div>
     </div>
 
-    <div class="right pr-0.5"></div>
+    <div class="right pr-0.5">
+        <Notification bind:this={notifyIcon} />
+    </div>
 </div>
 
 <style>

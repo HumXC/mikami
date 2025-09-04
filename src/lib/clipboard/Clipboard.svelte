@@ -100,8 +100,7 @@
         await os.exec(["sh", "-c", cmd + " && wtype -M ctrl -M shift v"]);
     };
     hotkeys("ctrl+c,space", () => {
-        copy();
-        window.close();
+        copy().then(() => window.close());
     });
     hotkeys("esc", () => {
         window.close();
@@ -130,8 +129,7 @@
         ensureVisible(containerRef, document.querySelector(`[data-index="${selected}"]`)!);
     });
     hotkeys("enter", () => {
-        copyAndPaste();
-        window.close();
+        copyAndPaste().then(() => window.close());
     });
 
     const onInputChange = async (e: Event) => {

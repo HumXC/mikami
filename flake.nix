@@ -38,6 +38,15 @@
             mika-shell.packages.${system}.debug
           ];
         MIKASHELL_DEV_SERVER = "http://localhost:5173";
+        GST_PLUGIN_SYSTEM_PATH_1_0 = with pkgs;
+          lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" [
+            gst_all_1.gst-plugins-base
+            gst_all_1.gst-plugins-good
+            gst_all_1.gst-plugins-bad
+            gst_all_1.gst-plugins-ugly
+            gst_all_1.gst-libav
+            gst_all_1.gstreamer
+          ];
       };
     });
   };

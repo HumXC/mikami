@@ -90,7 +90,7 @@
             `${framerate ? "--framerate=" + framerate : ""}`,
             `${codecParam ? "--codec-param=" + codecParam : ""}`,
         ].filter((c) => c.length > 0);
-        pid = await os.exec2(cmd);
+        pid = await os.execAsync(cmd);
         await layer.setKeyboardMode("none");
         layer.setInputRegion();
         startTime = new Date();

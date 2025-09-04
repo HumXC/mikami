@@ -5,7 +5,7 @@
     import { AppWindow } from "lucide-svelte";
     import { onMount } from "svelte";
     const padding = 8;
-    const HIDDEN_WIDTH = 6;
+    const HIDDEN_WIDTH = 2;
     const WIDTH = 270;
     const LAYER_WIDTH = WIDTH + padding * 5 + 4;
     let SCALE = 1;

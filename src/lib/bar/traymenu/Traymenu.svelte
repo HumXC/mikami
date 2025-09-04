@@ -2,14 +2,8 @@
     import { icon, layer, tray, window } from "@mika-shell/core";
     import { ArrowLeft, ArrowRight } from "lucide-svelte";
     import { onMount } from "svelte";
+    import { getHashSearchParams } from "../../../utils";
 
-    function getHashSearchParams() {
-        const h = globalThis.location.hash || "";
-        const qIdx = h.indexOf("?");
-        if (qIdx === -1) return new URLSearchParams();
-        const query = h.slice(qIdx + 1).split("#")[0]; // 去掉 '? 之前' 和任何后续 '#'
-        return new URLSearchParams(query);
-    }
     const parmas = getHashSearchParams();
     const service = parmas.get("service")!;
     const x = Number(parmas.get("x")!);

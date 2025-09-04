@@ -65,8 +65,8 @@
         if (e.ctrlKey && e.key === "a") {
             selection.x = 0;
             selection.y = 0;
-            selection.w = canvasElement.width;
-            selection.h = canvasElement.height;
+            selection.w = globalThis.window.innerWidth;
+            selection.h = globalThis.window.innerHeight;
         }
         screenshot();
     });

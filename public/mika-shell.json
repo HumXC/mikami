@@ -1,7 +1,6 @@
 {
     "alias": {
         "bar": "/#/bar",
-        "notification": "/#/notification",
         "screenshot": "/#/screenshot",
         "app-launcher": "/#/app-launcher",
         "workspace": "/#/workspace",
@@ -9,7 +8,8 @@
         "wf-recorder": "/#/wf-recorder",
         "power-menu": "/#/power-menu",
         "toolbar": "/#/toolbar",
-        "quick-run": "/#/quick-run"
+        "quick-run": "/#/quick-run",
+        "desktop": "/#/desktop"
     },
-    "startup": ["bar", "notification", "workspace"]
+    "startup": ["bar", "workspace", "desktop"]
 }

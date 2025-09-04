@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { layer, notifd, icon } from "@mika-shell/core";
-    import { tick } from "svelte";
+    import { layer, notifd, icon, mika } from "@mika-shell/core";
+    import { onMount, tick } from "svelte";
     import { flip } from "svelte/animate";
     import { cubicOut } from "svelte/easing";
+    import { getHashSearchParams } from "../../utils";
     const width = 340;
     const itemHeight = 80;
     let height = itemHeight;
@@ -36,10 +37,15 @@
             },
         };
     }
-
+    let closeTimer = 0;
     const updateHeight = () => {
         height = itemHeight * ns.length + itemGap * (ns.length <= 0 ? 0 : ns.length - 1);
         layer.setSize(width, height === 0 ? 1 : height);
+        if (height === 0) {
+            closeTimer = setTimeout(() => {
+                layer.close();
+            }, 1000);
+        }
     };
     let updateHeightTimer = 0;
     const closeNotification = (id: number) => {
@@ -58,16 +64,29 @@
     const clearTimer = (id: number) => {
         if (timer.has(id)) clearTimeout(timer.get(id));
     };
-    const createNotification = async (n: notifd.Notification) => {
+    const createNotification = async (id: number) => {
+        const n = await notifd.get(id);
         setTimer(n.id);
         ns = [n, ...ns];
         if (updateHeightTimer) clearTimeout(updateHeightTimer);
+        if (closeTimer) clearTimeout(closeTimer);
         await tick();
         updateHeight();
     };
-
-    notifd.on("added", async (id) => createNotification(await notifd.get(id)));
-    notifd.on("removed", (id) => closeNotification(id));
+    onMount(() => {
+        notifd.on("added", createNotification);
+        notifd.on("removed", closeNotification);
+        const parmas = getHashSearchParams();
+        const start = parmas.get("start");
+        const ns_: notifd.Notification[] = JSON.parse(localStorage.getItem("notify-items") || "[]");
+        for (const n of ns_.slice(Number(start) || 0)) {
+            createNotification(n.id);
+        }
+        return () => {
+            notifd.off("added", createNotification);
+            notifd.off("removed", closeNotification);
+        };
+    });
 
     const onClick = (id: number) => {
         notifd.activate(id);
