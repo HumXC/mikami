@@ -1,0 +1,12 @@
+{
+    "bar": "/#/bar",
+    "screenshot": "/#/screenshot",
+    "app-launcher": "/#/app-launcher",
+    "workspace": "/#/workspace",
+    "clipboard": "/#/clipboard",
+    "wf-recorder": "/#/wf-recorder",
+    "power-menu": "/#/power-menu",
+    "toolbar": "/#/toolbar",
+    "quick-run": "/#/quick-run",
+    "desktop": "/#/desktop"
+}

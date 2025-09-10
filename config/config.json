@@ -1,0 +1,6 @@
+{
+    "dev": {
+        "mikami": "http://localhost:5173/"
+    },
+    "startup": ["mikami.bar", "mikami.workspace", "mikami.desktop"]
+}

@@ -27,3 +27,5 @@ dist-ssr
 
 /mikami
 /result
+webview_data
+webview_cache
