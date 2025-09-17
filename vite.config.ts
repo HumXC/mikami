@@ -9,4 +9,11 @@ export default defineConfig({
         sourcemap: true,
         minify: false,
     },
+    server: {
+        hmr: {
+            protocol: "ws",
+            host: "localhost",
+            port: 5173,
+        },
+    },
 });

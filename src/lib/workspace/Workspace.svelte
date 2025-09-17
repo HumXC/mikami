@@ -10,7 +10,7 @@
     const LAYER_WIDTH = WIDTH + padding * 5 + 4;
     let SCALE = 1;
     let HEIGHT = 0;
-    let timer: number = 0;
+    let closeTimer: number = 0;
     let box: HTMLDivElement;
     let isShow = false;
     let activeWorkspace: number;
@@ -24,7 +24,7 @@
             backgroundTransparent: true,
         })
         .then(async () => {
-            const monitor_ = await monitor.get();
+            const monitor_ = await monitor.getCurrent();
             SCALE = WIDTH / monitor_.width;
             HEIGHT = monitor_.height * SCALE;
         });
@@ -102,11 +102,11 @@
                 update();
                 layer.setKeyboardMode("exclusive");
             }
-            clearTimeout(timer);
+            clearTimeout(closeTimer);
         });
         box.addEventListener("mouseleave", () => {
-            clearTimeout(timer);
-            timer = setTimeout(() => {
+            clearTimeout(closeTimer);
+            closeTimer = setTimeout(() => {
                 layer.setSize(HIDDEN_WIDTH, 0);
                 isShow = false;
                 layer.setKeyboardMode("none");

@@ -20,7 +20,7 @@
     async function hoverOpenToolbar() {
         if (toolbar === null) {
             toolbar = 0;
-            toolbar = await mika.open("toolbar");
+            toolbar = await mika.openAsync("toolbar");
         }
     }
     onMount(() => {

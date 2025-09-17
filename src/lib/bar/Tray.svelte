@@ -39,7 +39,7 @@
         } else {
             menu = [
                 service,
-                await mika.open(`/#/traymenu?service=${encodeURIComponent(service)}&x=${x}`),
+                await mika.openAsync(`/#/traymenu?service=${encodeURIComponent(service)}&x=${x}`),
             ];
         }
     }
