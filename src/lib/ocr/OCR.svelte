@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { createWorker, type Worker } from "tesseract.js";
+    import Tesseract, { createWorker, type Worker } from "tesseract.js";
     import Mask from "../screenshot/Mask.svelte";
     import Selector from "../screenshot/Selector.svelte";
     import { layer, os } from "@mika-shell/core";
@@ -30,7 +30,9 @@
     type Rectangle = { x: number; y: number; w: number; h: number };
     let worker: Worker;
     onMount(async () => {
-        worker = await createWorker(["eng", "chi_sim"]);
+        worker = await createWorker(["eng", "chi_sim"], Tesseract.OEM.DEFAULT, {
+            langPath: "/tessdata",
+        });
     });
     async function recognize() {
         if (!hasSelection) return;
