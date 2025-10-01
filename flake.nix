@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    mika-shell.url = "github:HumXC/mika-shell";
+    mika-shell.url = "github:MikaShell/mika-shell";
   };
 
   outputs = {

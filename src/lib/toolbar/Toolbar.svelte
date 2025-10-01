@@ -1,6 +1,6 @@
 <script lang="ts">
     import { layer, mika, os } from "@mika-shell/core";
-    import { UserCircleIcon, ScissorsIcon } from "lucide-svelte";
+    import { UserCircleIcon, ScissorsIcon, SearchIcon } from "lucide-svelte";
     import dayjs from "dayjs";
     import relativeTime from "dayjs/plugin/relativeTime";
     import duration from "dayjs/plugin/duration";
@@ -156,7 +156,17 @@
                     >{isRecording ? formatDuration(recordDuration) : "录屏"}</span
                 >
             </button>
-            <button>3</button>
+            <button
+                onclick={() => {
+                    document.body.style.visibility = "hidden";
+                    mika.open("ocr");
+                    layer.close();
+                }}
+                class="flex flex-col justify-center items-center"
+            >
+                <SearchIcon size={32} class="mb-2" />
+                <span class="absolute bottom-0 text-sm pb-1">文字识别</span>
+            </button>
             <button>4</button>
         </div>
     </div>

@@ -1,18 +1,13 @@
 <script lang="ts">
     import { layer, monitor, os } from "@mika-shell/core";
-    import { onMount, tick } from "svelte";
-    import { sleep } from "../../utils";
+    import { tick } from "svelte";
     import hotkeys from "hotkeys-js";
-    let canvasElement: HTMLCanvasElement;
-    let isDrawn = false;
+    import Mask from "./Mask.svelte";
+    import Selector from "./Selector.svelte";
+    let mask: Mask;
+    let selector: Selector;
+    let selection: Rectangle;
     type Rectangle = { x: number; y: number; w: number; h: number };
-
-    const selection: Rectangle = {
-        x: 0,
-        y: 0,
-        w: 0,
-        h: 0,
-    };
     layer.init({
         keyboardMode: "exclusive",
         namespace: "screenshot",
@@ -23,43 +18,11 @@
         exclusiveZone: -1,
     });
 
-    function CropImage(src: HTMLCanvasElement, rect: Rectangle, scale: number): string {
-        const canvas = document.createElement("canvas");
-        const x = rect.x * scale;
-        const y = rect.y * scale;
-        const w = rect.w * scale;
-        const h = rect.h * scale;
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(src, x, y, w, h, 0, 0, w, h);
-        return canvas.toDataURL("image/png", 1).replace("data:image/png;base64,", "");
-    }
     hotkeys("esc", (e) => {
         e.stopPropagation();
         layer.close();
     });
-    async function screenshot() {
-        if (!hasSelection(selection)) return;
-        // 避免选框出现在截图中
-        document.getElementById("highlight")!.style.display = "none";
-        await tick();
-        await tick();
-        await tick();
-        if (isDrawn) {
-            const cropped = CropImage(canvasElement, selection, await layer.getScale());
-            await os.write("/tmp/screenshot.png", cropped);
-            os.exec(["sh", "-c", "cat /tmp/screenshot.png | wl-copy -t image/png"]);
-            layer.close();
-        } else {
-            const image = await monitor.capture(0, selection, {
-                encode: "png",
-            });
-            await os.write("/tmp/screenshot.png", image.replace("data:image/png;base64,", ""));
-            os.exec(["sh", "-c", "cat /tmp/screenshot.png | wl-copy -t image/png"]);
-            layer.close();
-        }
-    }
+
     hotkeys("ctrl+a", (e) => {
         e.stopPropagation();
         if (e.ctrlKey && e.key === "a") {
@@ -68,108 +31,30 @@
             selection.w = globalThis.window.innerWidth;
             selection.h = globalThis.window.innerHeight;
         }
-        screenshot();
+        // screenshot();
     });
     hotkeys("f12", (e) => {
         e.stopPropagation();
         layer.openDevTools();
     });
-    document.addEventListener("contextmenu", function (e) {
-        e.preventDefault();
-    });
-    onMount(async () => {
-        const ro = new ResizeObserver((entries) => {
-            const w = entries[0].contentRect.width;
-            const h = entries[0].contentRect.height;
 
-            canvasElement.width = w;
-            canvasElement.height = h;
-        });
-        ro.observe(window.document.body);
-        const img = new Image();
-        img.onload = async () => {
-            const canvas = canvasElement;
-            const ctx = canvasElement.getContext("2d")!;
-            const cssWidth = canvasElement.width;
-            const cssHeight = canvasElement.height;
-            const dpr = await layer.getScale();
-
-            // 设置 canvas 内部像素大小
-            canvas.width = img.width;
-            canvas.height = img.height;
-
-            // CSS 显示大小不变
-            canvas.style.width = cssWidth + "px";
-            canvas.style.height = cssHeight + "px";
-
-            // 缩放上下文，让绘制坐标和 CSS 尺寸一致
-            ctx.scale(dpr, dpr);
-            ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
-            isDrawn = true;
-        };
-        monitor.capture(0, null, { encode: "png" }).then((src) => (img.src = src));
-    });
-
-    function hasSelection(selection: Rectangle) {
-        return selection.w > 0 && selection.h > 0;
+    async function screenshot() {
+        if (!hasSelection) return;
+        // 避免选框出现在截图中
+        selector.visible = false;
+        await tick();
+        await tick();
+        await tick();
+        const cropped = await mask.crop(selection);
+        const base64 = cropped.toDataURL("image/png", 1).replace("data:image/png;base64,", "");
+        await os.write("/tmp/screenshot.png", base64);
+        os.exec(["sh", "-c", "cat /tmp/screenshot.png | wl-copy -t image/png"]);
+        layer.close();
     }
-    let animationFrameId: number | null = null;
-    let isDragging = false;
-    let pointer = { x: 0, y: 0 };
+    let hasSelection = false;
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="relative w-full h-full" draggable="false">
-    <canvas
-        draggable="false"
-        bind:this={canvasElement}
-        class="absolute top-0 left-0 w-full h-full"
-        style:cursor="crosshair"
-        onmousedown={(e) => {
-            isDragging = true;
-            selection.w = 0;
-            selection.h = 0;
-            pointer.x = e.clientX;
-            pointer.y = e.clientY;
-        }}
-        onmousemove={(e) => {
-            if (!isDragging || animationFrameId !== null) return;
-            animationFrameId = requestAnimationFrame(() => {
-                animationFrameId = null;
-                let w = e.clientX - pointer.x + 1;
-                let h = e.clientY - pointer.y + 1;
-                selection.w = Math.abs(w);
-                selection.h = Math.abs(h);
-                selection.x = Math.min(e.clientX, pointer.x);
-                selection.y = Math.min(e.clientY, pointer.y);
-            });
-        }}
-        onmouseup={(e) => {
-            isDragging = false;
-            let w = e.clientX - pointer.x + 1;
-            let h = e.clientY - pointer.y + 1;
-            selection.w = Math.abs(w);
-            selection.h = Math.abs(h);
-            selection.x = Math.min(e.clientX, pointer.x);
-            selection.y = Math.min(e.clientY, pointer.y);
-            screenshot();
-        }}
-    ></canvas>
-    <div
-        id="highlight"
-        class="absolute z-50"
-        style:width={selection.w + 1 + "px"}
-        style:height={selection.h + 1 + "px"}
-        style:left={selection.x - 1 + "px"}
-        style:top={selection.y - 1 + "px"}
-        style:opacity={hasSelection(selection) ? 1 : 0}
-    ></div>
+    <Mask bind:this={mask}></Mask>
+    <Selector bind:this={selector} bind:hasSelection bind:selection onstop={screenshot}></Selector>
 </div>
-
-<style>
-    #highlight {
-        outline: 2px solid #fff;
-        background-color: transparent;
-        pointer-events: none;
-    }
-</style>

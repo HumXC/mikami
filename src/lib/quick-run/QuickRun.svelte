@@ -17,7 +17,7 @@
             // keyboardMode: "exclusive",
         })
         .then(async () => {
-            const m = await monitor.get();
+            const m = await monitor.getCurrent();
             layer.setMargin("top", Math.floor(m.height / 3));
         });
     onMount(() => {

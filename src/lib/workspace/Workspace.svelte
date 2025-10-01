@@ -143,6 +143,8 @@
     };
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
     class="w-full h-full transition-opacity duration-120 ease-in-out"
     style:opacity={isShow ? 1 : 0}
@@ -153,9 +155,7 @@
         class="contianer w-full h-full flex flex-col gap-4 overflow-auto rounded-xl"
         bind:this={box}
     >
-        {#each ws as workspace}
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
+        {#each ws as workspace (workspace.id)}
             <div
                 class="workspace relative w-full flex-shrink-0 border-0 rounded-sm"
                 style:height="{HEIGHT}px"
@@ -199,11 +199,20 @@
                         </div>
                     </div>
                 {/each}
+                <span class=" absolute bottom-0 left-0 text-xl font-bold p-2">{workspace.id}</span>
             </div>
         {/each}
+        <div
+            class="workspace w-full flex border-0 rounded-sm justify-center items-center text-2xl"
+            style:height="{HEIGHT}px"
+            style:line-height="{HEIGHT}px"
+            style:width="{WIDTH}px"
+            onclick={activate(ws[ws.length - 1].id + 1)}
+        >
+            Empty
+        </div>
     </div>
 </div>
-await
 
 <style>
     .contianer {
@@ -221,10 +230,10 @@ await
         box-shadow: 0px 0px 3px rgba(172, 255, 147, 0.81);
     }
     .client {
-        background-color: rgba(191, 191, 191, 0.474);
+        background-color: rgb(60, 118, 156);
     }
     .floating {
-        background-color: rgba(193, 193, 193, 0.267);
+        background-color: rgba(220, 159, 27, 0.412);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.25);

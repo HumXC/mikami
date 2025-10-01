@@ -71,16 +71,18 @@
                     }
                 }}
             >
-                <img
-                    alt=""
-                    src={tray.pickIcon(item, 256)}
-                    class="
-                    w-full
-                    h-full
-                    transition-all duration-300 ease-out
-                    flex items-center justify-center
-                "
-                />
+                {#await tray.pickIcon(item, 256) then icon}
+                    <img
+                        alt=""
+                        src={icon}
+                        class="
+                        w-full
+                        h-full
+                        transition-all duration-300 ease-out
+                        flex items-center justify-center
+                        "
+                    />
+                {/await}
             </div>
         {/each}
     </div>

@@ -5,15 +5,15 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1758108161,
-        "narHash": "sha256-DH0EHUNXyZXGSNP9aEwUYimaNqbhHvQaIJWvNxjodcU=",
-        "owner": "HumXC",
+        "lastModified": 1759299995,
+        "narHash": "sha256-fhQL23W6E1H6UuZcnY+4oRrIkYtqyKzf1ZixPYRECJg=",
+        "owner": "MikaShell",
         "repo": "mika-shell",
-        "rev": "b916ab3af1194782b61ee7c34c14438048f0264a",
+        "rev": "eb1212c30b1da5ceba6b4f18e60122f4ff692ce9",
         "type": "github"
       },
       "original": {
-        "owner": "HumXC",
+        "owner": "MikaShell",
         "repo": "mika-shell",
         "type": "github"
       }
