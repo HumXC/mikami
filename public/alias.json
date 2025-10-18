@@ -9,5 +9,6 @@
     "toolbar": "/#/toolbar",
     "quick-run": "/#/quick-run",
     "desktop": "/#/desktop",
-    "ocr": "/#/ocr"
+    "ocr": "/#/ocr",
+    "polkit-agent": "/#/polkit-agent"
 }

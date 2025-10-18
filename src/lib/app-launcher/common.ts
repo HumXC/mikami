@@ -72,12 +72,7 @@ async function ListApps(): Promise<Application[]> {
         let icon: string | null = null;
 
         try {
-            icon = await Icon.lookup(app.icon || "", 256);
-        } catch {}
-        try {
-            if (icon === null) {
-                icon = await Icon.lookup("application-x-executable-symbolic", 64);
-            }
+            icon = await Icon.lookup(app.icon || "application-x-executable-symbolic", 256);
         } catch {}
 
         let a: Application = {
