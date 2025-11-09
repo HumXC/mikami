@@ -10,5 +10,6 @@
     "quick-run": "/#/quick-run",
     "desktop": "/#/desktop",
     "ocr": "/#/ocr",
-    "polkit-agent": "/#/polkit-agent"
+    "polkit-agent": "/#/polkit-agent",
+    "activate": "/#/activate"
 }

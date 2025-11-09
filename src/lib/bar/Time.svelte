@@ -21,6 +21,4 @@
     });
 </script>
 
-<div>
-    <span class="font-bold text-[18px]">{formattedTime}</span>
-</div>
+<span class="font-bold text-[18px]">{formattedTime}</span>

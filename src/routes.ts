@@ -12,6 +12,7 @@ import Recorder from "./lib/wf-recorder/Recorder.svelte";
 import Workspace from "./lib/workspace/Workspace.svelte";
 import OCR from "./lib/ocr/OCR.svelte";
 import PolkitAgent from "./lib/polkit-agent/PolkitAgent.svelte";
+import Activate from "./lib/activate/Activate.svelte";
 export default {
     "/bar": Bar,
     "/notification": Notification,
@@ -27,4 +28,5 @@ export default {
     "/desktop": Desktop,
     "/ocr": OCR,
     "/polkit-agent": PolkitAgent,
+    "/activate": Activate,
 };

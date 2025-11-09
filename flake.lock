@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1760762427,
-        "narHash": "sha256-YgK71A9iFYFsdtsDDCtMT0/yn+6pkybSduabIyK6kw0=",
+        "lastModified": 1762084774,
+        "narHash": "sha256-tp/dr8sC7W0u2YaZPt6WjTVRdcRLwhMY4qmKWyq6gYw=",
         "owner": "MikaShell",
         "repo": "mika-shell",
-        "rev": "00b72a41ec366ea35a93c9a91bdaf5b6c05fbd16",
+        "rev": "677bd2c6879b95315f9316ffa3fdbcb1f8e611bb",
         "type": "github"
       },
       "original": {

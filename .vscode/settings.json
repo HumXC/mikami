@@ -1,0 +1,7 @@
+{
+    "css.lint.unknownAtRules": "ignore",
+    "html.customData": [
+        "./node_modules/@mika-shell/component/vscode.html-custom-data.json",
+        "./node_modules/@shoelace-style/shoelace/dist/vscode.html-custom-data.json"
+    ]
+}

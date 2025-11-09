@@ -32,7 +32,7 @@
             nodejs
             tailwindcss
             tailwindcss-language-server
-            vue-language-server
+            svelte-language-server
           ]
           ++ [
             mika-shell.packages.${system}.debug

@@ -4,7 +4,7 @@
     import Fuse from "fuse.js";
     import hotkeys from "hotkeys-js";
     import { SearchIcon, TerminalSquareIcon, FileQuestionIcon } from "lucide-svelte";
-    import { onMount, tick } from "svelte";
+    import { onMount } from "svelte";
     import { ensureVisible, KeyController, passControlKey } from "../../utils";
     let container: HTMLDivElement;
     layer
@@ -21,20 +21,20 @@
             layer.setMargin("top", Math.floor(m.height / 3));
         });
     onMount(() => {
-        const observer = new ResizeObserver(async () => {
-            const { width, height } = container.getBoundingClientRect();
-            const h = Math.min(300, Math.floor(height));
-            layer.setSize(600, h);
-            requestAnimationFrame(() => {
-                if (h === 300) {
-                    container.style.height = "100%";
-                } else {
-                    container.style.height = "auto";
-                }
-            });
-        });
+        let resizing = false;
+        new ResizeObserver(() => {
+            if (resizing) return;
+            const style = getComputedStyle(container);
+            const w =
+                container.scrollWidth + parseInt(style.marginLeft) + parseInt(style.marginRight);
+            const h =
+                container.scrollHeight + parseInt(style.marginTop) + parseInt(style.marginBottom);
 
-        observer.observe(container);
+            mikaShell.layer.setSize(w, h).then(() => {
+                resizing = false;
+            });
+        }).observe(container);
+
         document.addEventListener("keydown", (e) => {
             input.focus();
         });
@@ -56,7 +56,6 @@
         const result = fuse.search(input);
         payload = result.map((r) => r.item);
         selected = 0;
-        container.style.height = "auto";
     }
     let payload: Payload[] = [];
     const icons: any = {
@@ -85,7 +84,10 @@
 
 <!-- svelte-ignore a11y_autofocus -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div bind:this={container} class=" bg-[var(--bg)] w-full rounded-2xl p-2 flex flex-col gap-2">
+<div
+    bind:this={container}
+    class=" bg-[var(--bg)] w-full max-h-84 rounded-2xl p-2 flex flex-col gap-2"
+>
     <div class=" bg-[var(--bg2)] rounded-2xl flex items-center pl-2 pr-2">
         <SearchIcon />
         <input
