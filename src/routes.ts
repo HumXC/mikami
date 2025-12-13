@@ -13,6 +13,7 @@ import Workspace from "./lib/workspace/Workspace.svelte";
 import OCR from "./lib/ocr/OCR.svelte";
 import PolkitAgent from "./lib/polkit-agent/PolkitAgent.svelte";
 import Activate from "./lib/activate/Activate.svelte";
+import SidePanel from "./lib/side-panel/SidePanel.svelte";
 export default {
     "/bar": Bar,
     "/notification": Notification,
@@ -29,4 +30,5 @@ export default {
     "/ocr": OCR,
     "/polkit-agent": PolkitAgent,
     "/activate": Activate,
+    "/side-panel": SidePanel,
 };

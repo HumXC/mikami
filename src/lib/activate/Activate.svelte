@@ -1,13 +1,16 @@
 <script lang="ts">
     import { layer } from "@mika-shell/core";
-    layer.init({
-        anchor: ["bottom", "right"],
-        height: 160,
-        width: 400,
-        layer: "overlay",
-        backgroundTransparent: true,
-    });
-    layer.setInputRegion();
+    layer
+        .init({
+            anchor: ["bottom", "right"],
+            height: 160,
+            width: 400,
+            layer: "overlay",
+            backgroundTransparent: true,
+        })
+        .then(() => {
+            layer.setInputRegion();
+        });
 </script>
 
 <div class="opacity-40">

@@ -21,12 +21,10 @@
             toolbar = await mika.openAsync("toolbar");
         }
     }
-    onMount(() => {
-        services.notify(notifyIcon);
-    });
     mika.on("close", (id) => {
         if (id === toolbar) toolbar = null;
     });
+    new services.NotificationService("/#/notification");
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->

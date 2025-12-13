@@ -10,6 +10,7 @@
         "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
     },
     "devDependencies": {
+        "@mika-shell/core": "file:../mika-shell/mika-shell-core-0.0.4.tgz",
         "@sveltejs/vite-plugin-svelte": "^5.0.3",
         "@tailwindcss/postcss": "^4.1.2",
         "@tailwindcss/vite": "^4.1.2",
@@ -24,7 +25,6 @@
     },
     "dependencies": {
         "@mika-shell/component": "file:../mika-component",
-        "@mika-shell/core": "https://github.com/MikaShell/mika-shell/releases/download/latest/mika-shell-core-0.0.4.tgz",
         "@mika-shell/extra": "https://github.com/MikaShell/mika-shell/releases/download/latest/mika-shell-extra-0.0.4.tgz",
         "@shoelace-style/shoelace": "^2.20.1",
         "fuse.js": "^7.1.0",

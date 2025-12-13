@@ -4,11 +4,12 @@
     import { flip } from "svelte/animate";
     import { cubicOut } from "svelte/easing";
     import { getHashSearchParams } from "../../utils";
+    import { Notification, NotificationService } from "../bar/services";
     const width = 340;
     const itemHeight = 80;
     let height = itemHeight;
     const itemGap = 8;
-    let ns: notifd.Notification[] = $state([]);
+    let ns: Notification[] = $state([]);
     const timer: Map<number, number> = new Map();
     const animeDuration = 350;
     const timeout = 3000;
@@ -64,8 +65,7 @@
     const clearTimer = (id: number) => {
         if (timer.has(id)) clearTimeout(timer.get(id));
     };
-    const createNotification = async (id: number) => {
-        const n = await notifd.get(id);
+    const createNotification = async (n: Notification) => {
         setTimer(n.id);
         ns = [n, ...ns];
         if (updateHeightTimer) clearTimeout(updateHeightTimer);
@@ -73,26 +73,27 @@
         await tick();
         updateHeight();
     };
-    onMount(() => {
-        notifd.on("added", createNotification);
-        notifd.on("removed", closeNotification);
+    onMount(async () => {
         const parmas = getHashSearchParams();
-        const start = parmas.get("start");
-        const ns_: notifd.Notification[] = JSON.parse(localStorage.getItem("notify-items") || "[]");
-        for (const n of ns_.slice(Number(start) || 0)) {
-            createNotification(n.id);
+        let start = parmas.get("id");
+        const service = new NotificationService();
+        service.onAdded = createNotification;
+        service.onRemoved = closeNotification;
+
+        await service.ready();
+
+        const ns_ = await service.list(start ? parseInt(start) : null);
+        for (const n of ns_) {
+            createNotification(n);
         }
-        return () => {
-            notifd.off("added", createNotification);
-            notifd.off("removed", closeNotification);
-        };
     });
 
     const onClick = (id: number) => {
         notifd.activate(id);
         closeNotification(id);
     };
-    const getImage = async (n: notifd.Notification): Promise<string | undefined> => {
+    const getImage = async (n_: Notification): Promise<string | undefined> => {
+        const n = n_.data;
         if (n.hints.imageData) return n.hints.imageData.base64;
         if (n.hints.imagePath) return await icon.lookup(n.hints.imagePath, 256);
         if (n.appIcon) return await icon.lookup(n.appIcon, 256);
@@ -132,7 +133,7 @@
             <div class="flex flex-col justify-start items-start w-full">
                 <div class="w-full flex justify-between items-center">
                     <span class="font-bold text-sm truncate">{n.summary}</span>
-                    <span class="text-xs text-gray-500">{n.appName}</span>
+                    <span class="text-xs text-gray-500">{n.data.appName}</span>
                 </div>
                 <span class="text-gray-300 text-xs text-ellipsis line-clamp-2">{n.body}</span>
             </div>
