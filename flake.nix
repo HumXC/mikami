@@ -27,7 +27,7 @@
       pkgs = import nixpkgs {inherit system;};
     in {
       default = pkgs.mkShell {
-        buildInputs = with pkgs;
+        packages = with pkgs;
           [
             nodejs
             tailwindcss
