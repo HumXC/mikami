@@ -12,6 +12,7 @@ export interface TileOption {
     y: number;
     w: number;
     h: number;
+    page: number;
     type: TileType;
     data: TileData[TileType];
 }
@@ -54,6 +55,8 @@ export function SetupDargAndDrop(e: HTMLElement) {
             y: 0,
             w: 2,
             h: 2,
+            // TODO
+            page: 0,
             type: "app",
             data: entryId,
         };

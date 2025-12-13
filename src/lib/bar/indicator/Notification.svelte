@@ -38,7 +38,7 @@
             mika.close(id);
             return;
         }
-        sidePanel = await mika.openAsync(`/#/side-panel`);
+        sidePanel = await mika.openAsync("side-panel");
     }}
 >
     {#if quite}
