@@ -1,7 +1,7 @@
 <script lang="ts">
     import { BellIcon, BellDotIcon, BellOffIcon } from "lucide-svelte";
-    import { NotificationService, notifyQuiet } from "../services";
-    import { mika, monitor } from "@mika-shell/core";
+    import { NotificationService } from "../services";
+    import { mika } from "@mika-shell/core";
     export let size = 20;
     let state: "empty" | "notified" = "empty";
     let quite = false;
@@ -16,7 +16,12 @@
     service.onStateChanged = (newState) => {
         state = newState;
     };
-    let sidePanel = false;
+    let sidePanel = 0;
+    mika.on("close", (id: number) => {
+        if (id === sidePanel) {
+            sidePanel = 0;
+        }
+    });
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -27,12 +32,13 @@
         service.doNotDisturb = !service.doNotDisturb;
     }}
     onclick={async () => {
-        if (sidePanel) return;
-        sidePanel = true;
-        const m = await monitor.getCurrent();
-
-        await mika.open(`/#/side-panel?parent=${mikaShell.id}&width=${m.width}&height=${m.height}`);
-        sidePanel = false;
+        if (sidePanel !== 0) {
+            const id = sidePanel;
+            sidePanel = 0;
+            mika.close(id);
+            return;
+        }
+        sidePanel = await mika.openAsync(`/#/side-panel`);
     }}
 >
     {#if quite}
