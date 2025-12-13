@@ -8,6 +8,7 @@ type TileData = {
 export const cellSize = 60;
 
 export interface TileOption {
+    id: string; // 唯一标识符
     x: number;
     y: number;
     w: number;
@@ -43,6 +44,9 @@ export function NewTile(tile: TileOption) {
     });
     return item;
 }
+export function generateTileId(): string {
+    return "tile-" + Math.random().toString(36).substring(2, 11);
+}
 export function SetupDargAndDrop(e: HTMLElement) {
     const helper = (ee: HTMLElement) => {
         // FIXME: 拖放的元素和放置的元素具有不同的尺寸，这不对
@@ -51,6 +55,7 @@ export function SetupDargAndDrop(e: HTMLElement) {
             throw new Error("Invalid data-app-entry-id");
         }
         const tile: TileOption = {
+            id: generateTileId(),
             x: 0,
             y: 0,
             w: 2,

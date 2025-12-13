@@ -2,7 +2,10 @@
     import "gridstack/dist/gridstack.min.css";
     import { GridStack } from "gridstack";
     import { onMount } from "svelte";
-    import { cellSize, NewTile, type TileOption } from "./utils";
+    import { cellSize, generateTileId, NewTile, type TileOption } from "./utils";
+    import { contextMenuStore, hideContextMenu } from "./contextMenuStore";
+    import TileContextMenu from "./TileContextMenu.svelte";
+    import { Trash2 } from "lucide-svelte";
 
     let containerRef: HTMLDivElement;
     let pagesContainerRef: HTMLDivElement;
@@ -31,6 +34,7 @@
 
     // 计算总页数
     $: totalPages = maxPage - minPage + 1;
+
     function MountTile(grid: GridStack, tile: TileOption, id: number) {
         if (!grid) {
             throw new Error("Grid not initialized");
@@ -39,8 +43,12 @@
             console.warn("Not enough free space to place the widget on the grid", tile);
             return;
         }
+        // 为新的磁贴分配唯一 ID
+        if (!tile.id) {
+            tile.id = generateTileId();
+        }
         const item = NewTile(tile);
-        item.setAttribute("data-tile-id", id.toString());
+        item.setAttribute("data-tile-id", tile.id);
         return grid.makeWidget(item);
     }
     function updateTile(el: HTMLElement) {
@@ -54,7 +62,7 @@
             console.error("data-tile-id not found", el);
             return;
         }
-        const tile = tiles[parseInt(id)];
+        const tile = tiles.find((t) => t.id === id);
         if (!tile) {
             console.error("tile not found", id);
             return;
@@ -75,6 +83,19 @@
 
     function saveTiles() {
         localStorage.setItem("app-launcher-tiles", JSON.stringify(tiles));
+    }
+
+    function deleteTile(tileId: string) {
+        const index = tiles.findIndex((t) => t.id === tileId);
+        if (index >= 0 && index < tiles.length) {
+            tiles.splice(index, 1);
+            saveTiles();
+            updatePageRange();
+            // 重新初始化grids以更新显示
+            reinitAllGrids();
+            scrollToPage(currentPage, false);
+            hideContextMenu();
+        }
     }
 
     function updatePageRange() {
@@ -281,6 +302,7 @@
             const content = node.el!.querySelector(".tile")!;
             const appEntryId = content.getAttribute("data-app-entry-id")!;
             const tile: TileOption = {
+                id: generateTileId(),
                 x: node.x || 0,
                 y: node.y || 0,
                 w: node.w || 1,
@@ -289,7 +311,7 @@
                 type: "app",
                 data: appEntryId,
             };
-            node.el!.setAttribute("data-tile-id", tiles.length.toString());
+            node.el!.setAttribute("data-tile-id", tile.id);
             tiles.push(tile);
             keepGridHeight();
             saveTiles();
@@ -349,3 +371,49 @@
         {/each}
     </div>
 </div>
+
+<TileContextMenu>
+    <button
+        class="menu-item"
+        on:click={() => {
+            if ($contextMenuStore.tileId !== null) {
+                deleteTile($contextMenuStore.tileId);
+            }
+        }}
+    >
+        <Trash2 size={16} strokeWidth={1.5} />
+        <span>删除磁贴</span>
+    </button>
+</TileContextMenu>
+
+<style>
+    .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 8px 12px;
+        border: none;
+        background: transparent;
+        color: #ffffff;
+        font-size: 13px;
+        font-family:
+            "Segoe UI",
+            system-ui,
+            -apple-system,
+            sans-serif;
+        text-align: left;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.08s ease;
+    }
+
+    .menu-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .menu-item:active {
+        background: rgba(255, 255, 255, 0.05);
+        transform: scale(0.98);
+    }
+</style>

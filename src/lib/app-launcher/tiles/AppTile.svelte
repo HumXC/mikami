@@ -2,8 +2,10 @@
     import { onMount } from "svelte";
     import { apps, OnAppRun } from "../common";
     import { cellSize, type TileOption } from "./utils";
-    import { apps as App } from "@mika-shell/core";
+    import { apps as App, layer } from "@mika-shell/core";
     import { FileQuestionIcon } from "lucide-svelte";
+    import { showContextMenu } from "./contextMenuStore";
+
     const iconSizes = new Map<number, number>([
         [cellSize, cellSize * 0.65],
         [cellSize * 2, cellSize * 0.9],
@@ -18,6 +20,7 @@
     const app = apps.get(option.data);
     let showText = false;
     let tileEl: HTMLElement;
+
     function updateSize() {
         const rect = tileEl.getBoundingClientRect();
         const w = rect.width;
@@ -39,6 +42,20 @@
         App.activate(app.id);
         OnAppRun(app);
     }
+
+    function handleContextMenu(e: MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        // 查找最近的 grid-stack-item 父元素来获取 tile ID
+        let element = tileEl;
+        let tileId = "";
+        while (element && !tileId) {
+            tileId = element.getAttribute("data-tile-id") || "";
+            element = element.parentElement!;
+        }
+        showContextMenu(e.clientX, e.clientY, tileId);
+    }
+
     onMount(() => {
         updateSize();
 
@@ -60,6 +77,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
     on:click={RunApp}
+    on:contextmenu={handleContextMenu}
     bind:this={tileEl}
     data-app-entry-id={option.data}
     class="tile w-full h-full flex flex-col justify-center items-center rounded-lg"
