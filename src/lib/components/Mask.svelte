@@ -1,10 +1,15 @@
 <script lang="ts">
     import { layer, monitor } from "@mika-shell/core";
     import { onMount } from "svelte";
-    import { sleep } from "../../utils";
 
     let canvasElement: HTMLCanvasElement;
+    let maskCanvas: HTMLCanvasElement;
     type Rectangle = { x: number; y: number; w: number; h: number };
+
+    let selection: Rectangle = { x: 0, y: 0, w: 0, h: 0 };
+    let showMask = false;
+    let maskRedrawId: number | null = null;
+    const MASK_COLOR = "rgba(0, 0, 0, 0.5)";
 
     onMount(async () => {
         const ro = new ResizeObserver((entries) => {
@@ -13,6 +18,9 @@
 
             canvasElement.width = w;
             canvasElement.height = h;
+            maskCanvas.width = w;
+            maskCanvas.height = h;
+            redrawMask();
         });
         ro.observe(window.document.body);
         const img = new Image();
@@ -42,7 +50,44 @@
         };
         monitor.capture(0, null, { encode: "png" }).then((src) => (img.src = src));
     });
+
     export let ready = false;
+
+    function redrawMask() {
+        // 使用 requestAnimationFrame 来优化频繁的绘制
+        if (maskRedrawId !== null) return;
+
+        maskRedrawId = requestAnimationFrame(() => {
+            maskRedrawId = null;
+            const ctx = maskCanvas.getContext("2d")!;
+            const w = maskCanvas.width;
+            const h = maskCanvas.height;
+
+            // 清空画布
+            ctx.clearRect(0, 0, w, h);
+
+            if (!showMask) return;
+
+            // 绘制半透明黑色遮罩（覆盖整个区域）
+            ctx.fillStyle = MASK_COLOR;
+            ctx.fillRect(0, 0, w, h);
+
+            // 清除选框内部（变亮）
+            if (selection.w > 0 && selection.h > 0) {
+                ctx.clearRect(selection.x, selection.y, selection.w, selection.h);
+            }
+        });
+    }
+
+    export function setSelection(rect: Rectangle) {
+        selection = rect;
+        redrawMask();
+    }
+
+    export function setShowMask(show: boolean) {
+        showMask = show;
+        redrawMask();
+    }
 
     function CropImage(src: HTMLCanvasElement, rect: Rectangle, scale: number): HTMLCanvasElement {
         const canvas = document.createElement("canvas");
@@ -56,6 +101,7 @@
         ctx.drawImage(src, x, y, w, h, 0, 0, w, h);
         return canvas;
     }
+
     let task: (() => void)[] = [];
     export async function crop(rect: Rectangle): Promise<HTMLCanvasElement> {
         const scale = await layer.getScale();
@@ -72,4 +118,9 @@
 </script>
 
 <canvas draggable="false" bind:this={canvasElement} class="absolute top-0 left-0 w-full h-full"
+></canvas>
+<canvas
+    draggable="false"
+    bind:this={maskCanvas}
+    class="absolute top-0 left-0 w-full h-full pointer-events-none"
 ></canvas>

@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { layer, monitor, os } from "@mika-shell/core";
+    import { layer, os } from "@mika-shell/core";
     import { tick } from "svelte";
     import hotkeys from "hotkeys-js";
-    import Mask from "./Mask.svelte";
-    import Selector from "./Selector.svelte";
+    import Mask from "../components/Mask.svelte";
+    import SelectionBox from "../components/SelectionBox.svelte";
     let mask: Mask;
-    let selector: Selector;
+    let selectionBox: SelectionBox;
     let selection: Rectangle;
     type Rectangle = { x: number; y: number; w: number; h: number };
     layer.init({
@@ -17,7 +17,6 @@
         backgroundTransparent: true,
         exclusiveZone: -1,
     });
-
     hotkeys("esc", (e) => {
         e.stopPropagation();
         layer.close();
@@ -41,7 +40,7 @@
     async function screenshot() {
         if (!hasSelection) return;
         // 避免选框出现在截图中
-        selector.visible = false;
+        selectionBox.visible = false;
         await tick();
         await tick();
         await tick();
@@ -56,5 +55,12 @@
 
 <div class="relative w-full h-full" draggable="false">
     <Mask bind:this={mask}></Mask>
-    <Selector bind:this={selector} bind:hasSelection bind:selection onstop={screenshot}></Selector>
+    <SelectionBox
+        bind:this={selectionBox}
+        bind:hasSelection
+        bind:selection
+        enableMask
+        {mask}
+        onstop={screenshot}
+    ></SelectionBox>
 </div>

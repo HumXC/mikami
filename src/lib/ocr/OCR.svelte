@@ -1,8 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import Tesseract, { createWorker, type Worker } from "tesseract.js";
-    import Mask from "../screenshot/Mask.svelte";
-    import Selector from "../screenshot/Selector.svelte";
+    import Mask from "../components/Mask.svelte";
+    import SelectionBox from "../components/SelectionBox.svelte";
     import { layer, os } from "@mika-shell/core";
     import hotkeys from "hotkeys-js";
     let mask: Mask;
@@ -30,9 +30,7 @@
     type Rectangle = { x: number; y: number; w: number; h: number };
     let worker: Worker;
     onMount(async () => {
-        worker = await createWorker(["eng", "chi_sim"], Tesseract.OEM.DEFAULT, {
-            langPath: "/tessdata",
-        });
+        worker = await createWorker(["eng", "chi_sim"], Tesseract.OEM.DEFAULT);
     });
     async function recognize() {
         if (!hasSelection) return;
@@ -47,5 +45,6 @@
 
 <div class="relative w-full h-full" draggable="false">
     <Mask bind:this={mask} bind:ready></Mask>
-    <Selector bind:hasSelection bind:selection onstop={recognize}></Selector>
+    <SelectionBox bind:hasSelection bind:selection enableMask {mask} onstop={recognize}
+    ></SelectionBox>
 </div>
