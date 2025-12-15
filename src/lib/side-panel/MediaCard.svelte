@@ -169,7 +169,7 @@
         <div class="content-wrapper">
             <div class="cover-section">
                 {#if coverUrl}
-                    <img class="cover" src={coverUrl} alt="封面" />
+                    <img class="cover" src={coverUrl} alt="封面" draggable="false" />
                 {:else}
                     <div class="cover placeholder">♪</div>
                 {/if}

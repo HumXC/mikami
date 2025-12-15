@@ -4,8 +4,6 @@
     import Recording from "./indicator/Recording.svelte";
     import * as services from "./services";
     import Notification from "./indicator/Notification.svelte";
-    import { onMount } from "svelte";
-    let notifyIcon: Notification;
     layer.init({
         height: 34,
         anchor: ["top", "right", "left"],
@@ -25,13 +23,31 @@
         if (id === toolbar) toolbar = null;
     });
     new services.NotificationService("/#/notification");
+
+    let workspaceMenu: number = 0;
+    mika.on("close", (id) => {
+        if (id === workspaceMenu) workspaceMenu = 0;
+    });
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <mk-bar class="bar">
     <div slot="start" class=" flex flex-row pl-0.5 gap-2">
-        <mk-tray class="tray" contextMenuPath="/#/traymenu"></mk-tray>
-        <mk-hyprland-workspace class="workspace"></mk-hyprland-workspace>
+        <mk-tray class="tray" contextMenuPath="/#/traymenu" side="top"></mk-tray>
+
+        <mk-hyprland-workspace
+            class="workspace"
+            oncontextmenu={(e: MouseEvent) => {
+                e.preventDefault();
+                if (workspaceMenu === 0) {
+                    mika.openAsync("/#/workspace?side=top").then((id) => {
+                        workspaceMenu = id;
+                    });
+                } else {
+                    mika.close(workspaceMenu);
+                }
+            }}
+        ></mk-hyprland-workspace>
     </div>
 
     <div slot="center-start"></div>
@@ -42,7 +58,7 @@
         <Recording />
     </div>
 
-    <div slot="end" class="flex flex-row pr-0.5 gap-2"><Notification bind:this={notifyIcon} /></div>
+    <div slot="end" class="flex flex-row pr-0.5 gap-2"><Notification /></div>
 </mk-bar>
 
 <style>

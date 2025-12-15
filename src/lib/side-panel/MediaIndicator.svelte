@@ -11,7 +11,7 @@
 <div class="media-indicator" class:playing={isPlaying} on:click={onClick}>
     <div class="cover-preview">
         {#if coverUrl}
-            <img src={coverUrl} alt="封面" />
+            <img src={coverUrl} alt="封面" draggable="false" />
         {:else}
             <Music class="music-icon" />
         {/if}

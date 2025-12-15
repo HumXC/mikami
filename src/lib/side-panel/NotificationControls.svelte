@@ -3,9 +3,17 @@
     import type { NotificationService } from "../bar/services";
 
     export let notify: NotificationService;
-    export let dnd: boolean;
-    export let state: string;
+    let dnd: boolean = notify.doNotDisturb;
+    let state: string = notify.state;
     export let notificationCount: number;
+
+    notify.onDNDChanged = (value) => {
+        dnd = value;
+    };
+
+    notify.onStateChanged = (value) => {
+        state = value;
+    };
 
     function toggleDND() {
         notify.doNotDisturb = !notify.doNotDisturb;

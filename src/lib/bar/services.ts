@@ -214,7 +214,7 @@ export class NotificationService {
         return new Promise((resolve, reject) => {
             request.onsuccess = (event: any) => {
                 if (event.target.result) {
-                    resolve(event.target.result.value);
+                    resolve(event.target.result);
                 } else {
                     resolve(null);
                 }

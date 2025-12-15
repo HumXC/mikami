@@ -8,19 +8,16 @@
     import MediaCard from "./MediaCard.svelte";
     import MediaIndicator from "./MediaIndicator.svelte";
     import { onMount } from "svelte";
-    import { mpris } from "@mika-shell/core";
+    import { layer, mpris } from "@mika-shell/core";
     import NotificationControls from "./NotificationControls.svelte";
     import NotificationGroup from "./NotificationGroup.svelte";
 
-    let dnd = false;
-    let state = "empty";
     let ns: Notification[] = [];
     let previousGroupCount = 0;
 
     // 媒体/时钟翻面控制
     let mediaAvailable = false;
     let face: "clock" | "media" = "clock";
-    let userPinnedFace = false; // 用户手动选择后暂时不被自动切换覆盖
     let mediaCoverUrl: string | null = null;
     let mediaIsPlaying = false;
     const MEDIA_POLL_MS = 2000;
@@ -32,12 +29,6 @@
     };
     notify.onRemoved = (id) => {
         ns = ns.filter((n) => n.id !== id);
-    };
-    notify.onDNDChanged = (value) => {
-        dnd = value;
-    };
-    notify.onStateChanged = (value) => {
-        state = value;
     };
     notify.ready().then(async () => {
         ns = (await notify.list()).reverse();
@@ -118,27 +109,16 @@
         // 不再自动切换，只在媒体停止时回到时钟
         if (!mediaAvailable && face === "media") {
             face = "clock";
-            userPinnedFace = false;
         }
     }
 
     function showClock() {
         face = "clock";
-        userPinnedFace = true;
     }
 
     function showMedia() {
         if (!mediaAvailable) return;
         face = "media";
-        userPinnedFace = true;
-    }
-
-    function flipFace() {
-        if (face === "clock" && mediaAvailable) {
-            showMedia();
-        } else {
-            showClock();
-        }
     }
 
     onMount(() => {
@@ -150,9 +130,9 @@
     });
 </script>
 
-<FullscreenPanel>
+<FullscreenPanel onClick={layer.close} onEscape={layer.close} anchor={["right"]}>
     <div
-        class="absolute top-0 right-0 h-full bg-[var(--bg)] rounded-sm pl-4 pt-4 pb-4 gap-2 flex flex-col pointer-events-auto shadow-[0_10px_40px_-24px_rgba(0,0,0,0.6)]"
+        class=" h-full bg-[var(--bg)] rounded-sm pl-4 pt-4 pb-4 gap-2 flex flex-col pointer-events-auto shadow-[0_10px_40px_-24px_rgba(0,0,0,0.6)]"
         style:width="400px"
         transition:fly={{ x: 28, duration: 180, easing: cubicOut }}
     >
@@ -175,7 +155,7 @@
             </div>
         </div>
 
-        <NotificationControls {notify} {dnd} {state} notificationCount={ns.length} />
+        <NotificationControls {notify} notificationCount={ns.length} />
 
         <div class="flex flex-col gap-2 overflow-auto rounded-sm overflow-x-hidden h-full relative">
             {#if ns.length === 0}

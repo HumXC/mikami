@@ -5,6 +5,7 @@
     import { AppWindow } from "lucide-svelte";
     import { getHashSearchParams } from "../../utils";
     import { onMount } from "svelte";
+    import FullscreenPanel from "../components/FullscreenPanel.svelte";
     const WIDTH = 270;
     let SCALE = 1;
     let HEIGHT = 0;
@@ -12,20 +13,29 @@
     let activeWorkspace: number;
     const params = getHashSearchParams();
     let useKeyboard = params.get("keyboard") === "true";
-    layer
-        .init({
-            keyboardMode: "exclusive",
-            anchor: ["bottom", "top", "right"],
-            width: WIDTH + PADDING * 2,
-            margin: [8, 8, 8, 8],
-            layer: "top",
-            backgroundTransparent: true,
-        })
-        .then(async () => {
-            const monitor_ = await monitor.getCurrent();
-            SCALE = WIDTH / monitor_.width;
-            HEIGHT = Math.floor(monitor_.height * SCALE);
-        });
+    let side = params.get("side");
+    let width: string = "auto";
+    let height: string = "auto";
+    const layerConfig: Partial<layer.Options> = {
+        keyboardMode: useKeyboard ? "exclusive" : "ondemand",
+    };
+    switch (side) {
+        case "left":
+        case "right":
+            height = "100vh";
+            break;
+        case "top":
+        case "bottom":
+            width = "100vw";
+            break;
+    }
+
+    layer.on("show", async () => {
+        const monitor_ = await monitor.getCurrent();
+        SCALE = WIDTH / monitor_.width;
+        HEIGHT = Math.floor(monitor_.height * SCALE);
+    });
+
     type Workspace = {
         id: number;
         clients: {
@@ -109,7 +119,15 @@
             }
         }
     }
-
+    // Esc 关闭
+    hotkeys("esc", (e) => {
+        e.preventDefault();
+        layer.close();
+    });
+    hotkeys("tab", (e) => {
+        e.preventDefault();
+        nextWorkspace();
+    });
     // 在组件挂载时注册按键事件（仅当 useKeyboard 为 true）
     onMount(() => {
         update();
@@ -119,13 +137,6 @@
             e.preventDefault();
             nextWorkspace();
         });
-
-        // Esc 关闭
-        hotkeys("esc", (e) => {
-            e.preventDefault();
-            layer.close();
-        });
-
         // Alt 释放时关闭
         const onKeyUp = (e: KeyboardEvent) => {
             if (e.key === "Alt") {
@@ -158,65 +169,75 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<div
-    class="contianer w-full h-full flex flex-col items-center gap-4 overflow-auto rounded-xl"
-    style:padding="{PADDING}px"
->
-    {#each ws as workspace (workspace.id)}
+<FullscreenPanel {layerConfig} anchor={[side as any]} onClick={layer.close}>
+    <div
+        class="contianer flex items-center gap-4 overflow-auto rounded-xl"
+        class:flex-col={side === "left" || side === "right"}
+        class:flex-row={side === "top" || side === "bottom"}
+        style:padding="{PADDING}px"
+        style:width
+        style:height
+    >
+        {#each ws as workspace (workspace.id)}
+            <div
+                class="workspace relative w-full flex-shrink-0 border-0 rounded-sm"
+                style:height="{HEIGHT}px"
+                style:width="{WIDTH}px"
+                class:active={workspace.id === activeWorkspace}
+                onclick={activate(workspace.id)}
+            >
+                {#each workspace.clients as client}
+                    <div
+                        class="client absolute"
+                        class:floating={client.floating}
+                        style:left="{client.x}px"
+                        style:top="{client.y}px"
+                        style:width="{client.w}px"
+                        style:height="{client.h}px"
+                    >
+                        {#if client.w > 32}
+                            <div class="w-full h-full flex flex-col justify-center items-center">
+                                {#await getIcon(client.className)}
+                                    <AppWindow size={32} />
+                                {:then icon}
+                                    <img
+                                        src={icon}
+                                        alt={client.className}
+                                        class="w-[32px] h=[32px] object-contain"
+                                    />
+                                {:catch e}
+                                    <AppWindow size={32} />
+                                {/await}
+                                {#if client.w > 64}
+                                    <span
+                                        class="w-full text-center pl-2 pr-2 text-white whitespace-nowrap overflow-hidden text-ellipsis"
+                                        >{client.className}</span
+                                    >
+                                {/if}
+                            </div>
+                        {/if}
+
+                        <!-- overlay for hover highlight / quick affordance (no floating) -->
+                        <div class="client-overlay" aria-hidden="true"></div>
+                    </div>
+                {/each}
+                <span
+                    class=" absolute bottom-0 left-0 text-xl font-bold p-2 workspace-id"
+                    class:active-id={workspace.id === activeWorkspace}>{workspace.id}</span
+                >
+            </div>
+        {/each}
         <div
-            class="workspace relative w-full flex-shrink-0 border-0 rounded-sm"
+            class="workspace w-full flex-shrink-0 flex flex-col border-0 rounded-sm justify-center items-center text-xl"
             style:height="{HEIGHT}px"
             style:width="{WIDTH}px"
-            class:active={workspace.id === activeWorkspace}
-            onclick={activate(workspace.id)}
+            onclick={activate(ws[ws.length - 1].id + 1)}
         >
-            {#each workspace.clients as client}
-                <div
-                    class="client absolute"
-                    class:floating={client.floating}
-                    style:left="{client.x}px"
-                    style:top="{client.y}px"
-                    style:width="{client.w}px"
-                    style:height="{client.h}px"
-                >
-                    <div class="w-full h-full flex flex-col justify-center items-center">
-                        {#await getIcon(client.className)}
-                            <AppWindow size={32} />
-                        {:then icon}
-                            <img
-                                src={icon}
-                                alt={client.className}
-                                class="w-[32px] h=[32px] object-contain"
-                            />
-                        {:catch e}
-                            <AppWindow size={32} />
-                        {/await}
-                        <span
-                            class="w-full text-center pl-2 pr-2 text-white whitespace-nowrap overflow-hidden text-ellipsis"
-                            >{client.className}</span
-                        >
-                    </div>
-
-                    <!-- overlay for hover highlight / quick affordance (no floating) -->
-                    <div class="client-overlay" aria-hidden="true"></div>
-                </div>
-            {/each}
-            <span
-                class=" absolute bottom-0 left-0 text-xl font-bold p-2 workspace-id"
-                class:active-id={workspace.id === activeWorkspace}>{workspace.id}</span
-            >
+            <div class="text-4xl mb-2">+</div>
+            <div>新建工作区</div>
         </div>
-    {/each}
-    <div
-        class="workspace w-full flex-shrink-0 flex flex-col border-0 rounded-sm justify-center items-center text-xl"
-        style:height="{HEIGHT}px"
-        style:width="{WIDTH}px"
-        onclick={activate(ws[ws.length - 1].id + 1)}
-    >
-        <div class="text-4xl mb-2">+</div>
-        <div>新建工作区</div>
     </div>
-</div>
+</FullscreenPanel>
 
 <style>
     .contianer {
