@@ -3,25 +3,21 @@
     import { hyprland } from "@mika-shell/extra";
     import hotkeys from "hotkeys-js";
     import { AppWindow } from "lucide-svelte";
+    import { getHashSearchParams } from "../../utils";
     import { onMount } from "svelte";
-    const padding = 8;
-    const HIDDEN_WIDTH = 2;
     const WIDTH = 270;
-    const LAYER_WIDTH = WIDTH + padding * 5 + 4;
-    const ENTER_DELAY = 120; // 鼠标进入后延迟显示的时间(毫秒)
     let SCALE = 1;
     let HEIGHT = 0;
-    let closeTimer: number = 0;
-    let enterTimer: number = 0;
-    let box: HTMLDivElement;
-    let isShow = false;
+    const PADDING = 16;
     let activeWorkspace: number;
-
+    const params = getHashSearchParams();
+    let useKeyboard = params.get("keyboard") === "true";
     layer
         .init({
-            keyboardMode: "none",
+            keyboardMode: "exclusive",
             anchor: ["bottom", "top", "right"],
-            width: HIDDEN_WIDTH,
+            width: WIDTH + PADDING * 2,
+            margin: [8, 8, 8, 8],
             layer: "top",
             backgroundTransparent: true,
         })
@@ -105,28 +101,38 @@
         });
         ws = Array.from(map.values()).sort((a, b) => a.id - b.id);
     };
-    onMount(async () => {
-        window.addEventListener("mousemove", async () => {
-            if (!isShow) {
-                clearTimeout(enterTimer);
-                enterTimer = setTimeout(() => {
-                    isShow = true;
-                    layer.setSize(LAYER_WIDTH, 0);
-                    update();
-                    layer.setKeyboardMode("exclusive");
-                }, ENTER_DELAY);
+    function nextWorkspace() {
+        for (let i = 0; i < ws.length; i++) {
+            if (ws[i].id === activeWorkspace) {
+                activate(ws[(i + 1) % ws.length].id)();
+                break;
             }
-            clearTimeout(closeTimer);
+        }
+    }
+
+    // 在组件挂载时注册按键事件（仅当 useKeyboard 为 true）
+    onMount(() => {
+        update();
+        if (!useKeyboard) return;
+        // Tab 轮换工作区（按一次切一次）
+        hotkeys("alt+tab", (e) => {
+            e.preventDefault();
+            nextWorkspace();
         });
-        box.addEventListener("mouseleave", () => {
-            clearTimeout(closeTimer);
-            clearTimeout(enterTimer);
-            closeTimer = setTimeout(() => {
-                layer.setSize(HIDDEN_WIDTH, 0);
-                isShow = false;
-                layer.setKeyboardMode("none");
-            }, 100);
+
+        // Esc 关闭
+        hotkeys("esc", (e) => {
+            e.preventDefault();
+            layer.close();
         });
+
+        // Alt 释放时关闭
+        const onKeyUp = (e: KeyboardEvent) => {
+            if (e.key === "Alt") {
+                layer.close();
+            }
+        };
+        window.addEventListener("keyup", onKeyUp);
     });
     const activate = (id: number) => {
         return () => {
@@ -135,15 +141,7 @@
         };
     };
     const desktopEntrys = JSON.parse(localStorage.getItem("app-launcher-apps") || "[]");
-    hotkeys("tab", (e) => {
-        e.preventDefault();
-        for (let i = 0; i < ws.length; i++) {
-            if (ws[i].id === activeWorkspace) {
-                activate(ws[(i + 1) % ws.length].id)();
-                break;
-            }
-        }
-    });
+
     const getIcon = async (className: string) => {
         try {
             return await icon.lookup(className.toLowerCase(), 256);
@@ -156,109 +154,73 @@
         }
         throw new Error("icon not found");
     };
-
-    // Svelte action: 如果文本被裁切（scrollWidth > clientWidth），则隐藏该文本节点
-    function hideIfOverflow(node: HTMLElement) {
-        const update = () => {
-            // 使用 requestAnimationFrame 防止测量抖动
-            requestAnimationFrame(() => {
-                try {
-                    node.style.display = node.scrollWidth > node.clientWidth ? "none" : "";
-                } catch {
-                    // ignore for safety
-                }
-            });
-        };
-
-        const ro = new ResizeObserver(update);
-        ro.observe(node);
-        // 也观察父元素的尺寸变化，父元素变化可能导致文本被裁切
-        if (node.parentElement) ro.observe(node.parentElement);
-
-        // 初始检查
-        update();
-
-        return {
-            destroy() {
-                ro.disconnect();
-            },
-        };
-    }
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
-    class="w-full h-full transition-opacity duration-120 ease-in-out"
-    style:opacity={isShow ? 1 : 0}
-    style:padding="{padding}px {padding}px {padding}px 0"
+    class="contianer w-full h-full flex flex-col items-center gap-4 overflow-auto rounded-xl"
+    style:padding="{PADDING}px"
 >
-    <div
-        style:padding="{padding * 2}px"
-        class="contianer w-full h-full flex flex-col gap-4 overflow-auto rounded-xl"
-        bind:this={box}
-    >
-        {#each ws as workspace (workspace.id)}
-            <div
-                class="workspace relative w-full flex-shrink-0 border-0 rounded-sm"
-                style:height="{HEIGHT}px"
-                style:width="{WIDTH}px"
-                class:active={workspace.id === activeWorkspace}
-                onclick={activate(workspace.id)}
-            >
-                {#each workspace.clients as client}
-                    <div
-                        class="client absolute"
-                        class:floating={client.floating}
-                        style:left="{client.x}px"
-                        style:top="{client.y}px"
-                        style:width="{client.w}px"
-                        style:height="{client.h}px"
-                    >
-                        <div class="w-full h-full flex flex-col justify-center items-center">
-                            {#await getIcon(client.className)}
-                                <AppWindow size={32} />
-                            {:then icon}
-                                <img
-                                    src={icon}
-                                    alt={client.className}
-                                    class="w-[32px] h=[32px] object-contain"
-                                />
-                            {:catch e}
-                                <AppWindow size={32} />
-                            {/await}
-                            <span
-                                use:hideIfOverflow
-                                class="w-full text-center pl-2 pr-2 text-white whitespace-nowrap overflow-hidden text-ellipsis"
-                                >{client.className}</span
-                            >
-                        </div>
-
-                        <!-- overlay for hover highlight / quick affordance (no floating) -->
-                        <div class="client-overlay" aria-hidden="true"></div>
-                    </div>
-                {/each}
-                <span class=" absolute bottom-0 left-0 text-xl font-bold p-2">{workspace.id}</span>
-            </div>
-        {/each}
+    {#each ws as workspace (workspace.id)}
         <div
-            class="workspace w-full flex-shrink-0 flex flex-col border-0 rounded-sm justify-center items-center text-xl"
+            class="workspace relative w-full flex-shrink-0 border-0 rounded-sm"
             style:height="{HEIGHT}px"
             style:width="{WIDTH}px"
-            onclick={activate(ws[ws.length - 1].id + 1)}
+            class:active={workspace.id === activeWorkspace}
+            onclick={activate(workspace.id)}
         >
-            <div class="text-4xl mb-2">+</div>
-            <div>新建工作区</div>
+            {#each workspace.clients as client}
+                <div
+                    class="client absolute"
+                    class:floating={client.floating}
+                    style:left="{client.x}px"
+                    style:top="{client.y}px"
+                    style:width="{client.w}px"
+                    style:height="{client.h}px"
+                >
+                    <div class="w-full h-full flex flex-col justify-center items-center">
+                        {#await getIcon(client.className)}
+                            <AppWindow size={32} />
+                        {:then icon}
+                            <img
+                                src={icon}
+                                alt={client.className}
+                                class="w-[32px] h=[32px] object-contain"
+                            />
+                        {:catch e}
+                            <AppWindow size={32} />
+                        {/await}
+                        <span
+                            class="w-full text-center pl-2 pr-2 text-white whitespace-nowrap overflow-hidden text-ellipsis"
+                            >{client.className}</span
+                        >
+                    </div>
+
+                    <!-- overlay for hover highlight / quick affordance (no floating) -->
+                    <div class="client-overlay" aria-hidden="true"></div>
+                </div>
+            {/each}
+            <span
+                class=" absolute bottom-0 left-0 text-xl font-bold p-2 workspace-id"
+                class:active-id={workspace.id === activeWorkspace}>{workspace.id}</span
+            >
         </div>
+    {/each}
+    <div
+        class="workspace w-full flex-shrink-0 flex flex-col border-0 rounded-sm justify-center items-center text-xl"
+        style:height="{HEIGHT}px"
+        style:width="{WIDTH}px"
+        onclick={activate(ws[ws.length - 1].id + 1)}
+    >
+        <div class="text-4xl mb-2">+</div>
+        <div>新建工作区</div>
     </div>
 </div>
 
 <style>
-    /* 主题变量已迁移到 .contianer（不使用 :root）
-       保持 --bg 不变。tiled 使用蓝色系，floating 使用金黄色系。 */
-
     .contianer {
-        /* 局部主题变量（不使用 :root） */
+        /* 局部主题变量 */
         --panel-border: rgba(255, 255, 255, 0.05);
         --workspace-bg: rgba(255, 255, 255, 0.09);
         --workspace-hover: rgba(255, 255, 255, 0.18);
@@ -267,13 +229,13 @@
         /* floating: 金黄色系 (浮动窗口) - 使用单一纯色 */
         --floating-color: rgba(252, 224, 123, 0.482);
         --accent: 80, 160, 255;
+        --active-green: 67, 197, 114;
 
         background-color: var(--bg);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         border: 1px solid var(--panel-border);
         box-sizing: border-box;
-        padding: 6px;
     }
 
     .workspace {
@@ -296,11 +258,24 @@
     }
 
     .active {
-        box-shadow:
-            0 10px 36px rgba(0, 0, 0, 0.45),
-            0 0 0 4px rgba(var(--accent), 0.06) inset;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
         transform: none;
-        outline: 1px solid rgba(var(--accent), 0.08);
+        outline: none;
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* 激活工作区外部发光描边 */
+    .workspace.active::before {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+        inset: -6px;
+        border-radius: 12px;
+        border: 1px solid rgba(var(--active-green), 0.4);
+        box-shadow:
+            0 0 14px 6px rgba(var(--active-green), 0.55),
+            0 0 2px 1px rgba(var(--active-green), 0.5);
+        filter: blur(0.3px);
     }
 
     /* client 动画与边框固定在 box-sizing 内 */
@@ -377,5 +352,19 @@
         font-size: 16px;
         margin-top: 6px;
         opacity: 0.95;
+    }
+
+    /* 工作区编号尺寸与激活态放大 */
+    .workspace-id {
+        transition:
+            transform 140ms ease,
+            color 140ms ease,
+            text-shadow 140ms ease;
+    }
+
+    .workspace-id.active-id {
+        transform: scale(1.28);
+        color: rgba(var(--active-green), 0.95);
+        text-shadow: 0 0 10px rgba(var(--active-green), 0.6);
     }
 </style>

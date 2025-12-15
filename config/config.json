@@ -2,7 +2,7 @@
     "dev": {
         "mikami": "http://localhost:5173/"
     },
-    "startup": ["mikami.bar", "mikami.workspace", "mikami.desktop", "mikami.activate"],
+    "startup": ["mikami.bar", "mikami.desktop", "mikami.activate"],
     "services": [
         {
             "event": "polkitAgent.begin",
